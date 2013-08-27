@@ -28,6 +28,8 @@ local statusbar = require('statusbar')
 
 local picturesque = require('picturesque')
 
+local lustrous = require('lustrous')
+
 -- Map useful functions outside
 calc = utility.calc
 notify_at = utility.notify_at
@@ -55,6 +57,10 @@ utility.autorun(autorunApps, runOnceApps)
 
 -- Various initialization
 thinkpad.touchpad.enable(false)
+
+lustrous.init { lat = private.user.loc.lat,
+                lon = private.user.loc.lon,
+                offset = private.user.time_offset }
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
@@ -244,7 +250,7 @@ globalkeys = awful.util.table.join(
    awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts,  1) end),
    awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end),
    awful.key({ modkey, "Control" }, "n", awful.client.restore),
-   awful.key({ }, "Print", function () awful.util.spawn("scrot -e 'mv $f ~/.cache/scrot/'") end),
+   awful.key({ }, "Print", function () awful.util.spawn("snap " .. os.date("%d%m%Y_%H%M%S")) end ),
    awful.key({ modkey }, "Print", function () utility.spawn_in_terminal("scripts/snappy") end),
    awful.key({ modkey }, "b", function ()
                                  statusbar.wiboxes[mouse.screen].visible = not statusbar.wiboxes[mouse.screen].visible
