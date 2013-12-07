@@ -30,13 +30,17 @@ local fetch_img_cmd = "wget -q %s -O %s 2> /dev/null"
 local function get_random_page_url (f)
    local s = f:read()
    f:close()
-   return s:match("href='([^']+)'")
+   if s then
+      return s:match("href='([^']+)'")
+   end
 end
 
 local function get_image_url (f)
    local s = f:read()
    f:close()
-   return s:match('href="([^"]+)"')
+   if s then
+      return s:match('href="([^"]+)"')
+   end
 end
 
 local function get_aspects (w, h)
@@ -59,9 +63,11 @@ function picturesque.change_image ()
    asyncshell.request(format(get_url_cmd, w, h, picturesque.sfw and "0" or "\\&"),
                       function (f)
                          local url = get_random_page_url(f)
+                         if not url then return end
                          asyncshell.request(format(get_img_url_cmd, url),
                                             function (f)
                                                local img_url = get_image_url(f)
+                                               if not img_url then return end
                                                asyncshell.request(format(fetch_img_cmd, img_url, name),
                                                                   function (f)
                                                                      f:close()
