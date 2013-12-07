@@ -19,16 +19,20 @@ local cond_mapping = {
    ["Partly Cloudy"] = { sym = "☁", icon = 'weather-few-clouds', icon_night = 'weather-few-clouds-night' },
    ["Overcast"] = { sym = "☁", icon = 'weather-overcast' },
    ["Cloudy"] = { sym = "☁", icon = 'weather-overcast' },
-   ["Fog"] = { sym = "☁", icon = 'weather-fog.png' },
+   ["[Ff]og"] = { sym = "☁", icon = 'weather-fog.png' },
    ["Mist"] = { sym = "☁", icon = 'weather-fog.png' },
    ["outbreaks"] = { sym = "☂", icon = 'weather-storm' },
    ["Patchy rain"] = { sym = "☂", icon = 'weather-showers-scattered' },
    ["Light rain"] = { sym = "☂", icon = 'weather-showers-scattered' },
    ["light rain"] = { sym = "☂", icon = 'weather-showers-scattered' },
    ["Moderate rain"] = { sym = "☂", icon = 'weather-showers' },
+   ["Heavy rain"] = { sym = "☂", icon = 'weather-showers' },
    ["rain shower"] = { sym = "☂", icon = 'weather-showers' },
    ["drizzle"] = { sym = "☂", icon = 'weather-showers-scattered' },
-   ["with thunder"] = { sym = "☂", icon = 'weather-storm.png' }
+   ["with thunder"] = { sym = "☂", icon = 'weather-storm.png' },
+   ["Patchy sleet"] = { sym = "☃", icon = 'weather-snow.png' },
+   ["snow"] = { sym = "☃", icon = 'weather-snow.png' },
+   ["[Ss]leet"] = { sym = "☃", icon = 'weather-snow.png' }
 }
 
 local function command ()
@@ -42,6 +46,7 @@ local function widget_line (t)
 end
 
 local function forecast_line (t, today)
+   if t == nil then return "ERROR" end
    local day, temp
    if today then
       day, temp = "Today", t.temp .. "°C  "
@@ -103,7 +108,9 @@ function weather.callback (file)
       end
    end
    file:close()
-   weather.update_tooltip(weather._widget)
+   if w.weather.today then
+      weather.update_tooltip(weather._widget)
+   end
 end
 
 function weather.process_entry (t, today)
@@ -124,6 +131,10 @@ function weather.process_entry (t, today)
          break
       end
    end
+end
+
+function weather.refresh()
+   asyncshell.request(command(), weather.callback)
 end
 
 function weather.new()
@@ -150,10 +161,7 @@ function weather.new()
       timeout = 0,
       icon_size = 48 }
 
-   scheduler.register_recurring("topjets_weather", 60,
-                                function ()
-                                   asyncshell.request(command(), weather.callback)
-                                end)
+   scheduler.register_recurring("topjets_weather", 60, weather.refresh)
 
    utility.add_hover_tooltip(weather._widget,
                              function(w)

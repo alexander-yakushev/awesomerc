@@ -1,30 +1,76 @@
 local wibox = require('wibox')
 local system = require('system')
 local iconic = require('iconic')
+local utility = require('utility')
 
 local network = {}
 
-local format = " %d ms"
+local format = " %s%d ms"
 local hosts = { "github.com", "195.24.232.203", "128.39.32.2" }
-local labels = { "W", "W w/o DNS", "L" }
+local short_labels = { "", "^DNS: ", "L: " }
+local labels = { "World", "W/o DNS", "Local" }
+local tooltip = {
+   title = "Network\t\tLatency\t\tLoss",
+   timeout = 0,
+   icon_size = 48 }
 
-local iconic_args = { preferred_size = "24x24" }
+local icon_names = { connected = "network-transmit-receive",
+                     wireless = "network-wireless-signal-excellent",
+                     disconnected = "network-offline" }
 
-local function data_callback(w, data)
+local function connection_callback(w, type)
+   local icon
+   if type == "wired" then
+      icon = "connected"
+   elseif type == "wireless" then
+      icon = "wireless"
+   else
+      icon = "disconnected"
+   end
+
+   w.network_icon:set_image(icons.small[icon])
+   tooltip.icon = icons.large[icon]
+   if type == "none" then
+      w.network_text:set_markup("")
+   end
+end
+
+local function update_tooltip (data)
+   tooltip.text = ""
+   for i = 1, #hosts do
+      local lat = data[hosts[i]].time
+      if lat == -1 then
+         lat = "∞\t"
+      elseif lat < 1 then
+         lat = math.floor(lat * 1000) .. " μs"
+      else
+         lat = math.floor(lat) .. " ms"
+      end
+      tooltip.text = tooltip.text .. string.format("%s\t\t%s\t\t%d%%",
+                                                   labels[i], lat, data[hosts[i]].loss)
+      if i < #hosts then
+         tooltip.text = tooltip.text .. "\n"
+      end
+   end
+end
+
+local function latency_callback(w, data)
+   update_tooltip(data)
    for i = 1, #hosts do
       if data[hosts[i]].loss ~= 100 then
-         w.network_text:set_markup(string.format(format, data[hosts[i]].time))
-         w.network_icon:set_image(icons.connected)
+         w.network_text:set_markup(string.format(format, short_labels[i], data[hosts[i]].time))
          return
       end
    end
-   w.network_icon:set_icon(icons.disconnected)
    w.network_text:set_markup("")
 end
 
 function network.new()
-   icons = { connected = iconic.lookup_status_icon("network-transmit-receive", iconic_args),
-             disconnected = iconic.lookup_status_icon("network-offline", iconic_args) }
+   icons = { small = {}, large = {} }
+   for k, v in pairs(icon_names) do
+      icons.small[k] = iconic.lookup_status_icon(v, { preferred_size = "24x24" })
+      icons.large[k] = iconic.lookup_status_icon(v, { preferred_size = "128x128" })
+   end
 
    local network_icon = wibox.widget.imagebox()
    local network_text = wibox.widget.textbox()
@@ -39,12 +85,21 @@ function network.new()
    network_icon:set_image(icons.disconnected)
    network_text:set_markup("")
 
+   system.network.interfaces = { "eth0", "wlan0" }
+   system.network.add_connection_callback(function(_, type)
+                                             connection_callback(_widget, type)
+                                          end)
    system.network.hosts = hosts
-   system.network.add_callback(function(data)
-                                  data_callback(_widget, data)
-                               end)
+   system.network.add_latency_callback(function(data)
+                                          latency_callback(_widget, data)
+                                       end)
+
    system.network.init()
 
+   utility.add_hover_tooltip(_widget,
+                             function(w)
+                                return tooltip
+                             end)
    return _widget
 end
 

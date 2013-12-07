@@ -10,7 +10,6 @@ local icons
 local widget_opts = { preferred_size = '24x24' }
 
 local function get_master_infos(f)
-  -- local f=io.popen("amixer get Master")
   for line in f:lines() do
     if string.match(line, "%s%[%d+%%%]%s") ~= nil then
       volume=string.match(line, "%s%[%d+%%%]%s")
