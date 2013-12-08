@@ -39,7 +39,7 @@ function statusbar.create(s)
 
    l = { left = { w.menu_icon, O, w.tags[s], O, w.prompt[s] },
          middle = w.programs[s],
-         right = { O, w.mpd.layout, I, w.kbd, I, w.weather, I, w.net, I,
+         right = { O, w.mpd.widget, I, w.kbd, I, w.weather, I, w.net, I,
                    w.cpu, I, w.mem, I, w.vol, I, w.battery, I, w.time, O }
    }
 
@@ -99,8 +99,7 @@ function statusbar.initialize()
    -- CPU widget
    widgets.cpu = topjets.cpu()
    widgets.cpu:buttons(
-      keymap({ mouse.LEFT, function() utility.spawn_in_terminal("htop") end },
-             { mouse.RIGHT, function() widgets.cpu.width = 1 end }))
+      keymap({ mouse.LEFT, function() utility.spawn_in_terminal("htop") end }))
 
    -- Memory widget
    widgets.mem = topjets.memory()
@@ -113,6 +112,8 @@ function statusbar.initialize()
 
    -- Weather widget
    widgets.weather = topjets.weather()
+   widgets.weather:buttons(
+      keymap({ mouse.LEFT, widgets.weather.update}))
 
    -- Keyboard widget
    widgets.kbd = topjets.kbd()
@@ -126,7 +127,11 @@ function statusbar.initialize()
 
    -- MPD widget
    local mpd = awesompd:create()
+   awesompd.STOPPED = ""
    mpd.font = "Liberation Mono"
+   mpd.backgroud = "#000000"
+   mpd.widget_icon = iconic.lookup_icon("gmpc", { preferred_size = "24x24",
+                                                  icon_types = { "/apps/" }})
    mpd.scrolling = true
    mpd.output_size = 30
    mpd.update_interval = 10

@@ -50,7 +50,8 @@ runOnceApps = {
    'kbdd',
    '/usr/bin/avfsd -o allow_root -o intr -o sync_read /avfs',
    'owncloud',
-   'pulseaudio --start'
+   'pulseaudio --start',
+   'redshift -l 60.8:10.7 -m vidmode -g 0.8 -t 6500:5500'
 }
 
 utility.autorun(autorunApps, runOnceApps)
@@ -68,7 +69,6 @@ beautiful.init(awful.util.getdir("config") .. "/themes/serenity/theme.lua")
 beautiful.onscreen.init()
 
 -- {{{ Wallpaper
---picturesque.resolution = function () return 1280, 768 end
 picturesque.sfw = true
 scheduler.register_recurring("picturesque", 1800, picturesque.change_image)
 -- }}}
@@ -90,13 +90,14 @@ layouts = {
    awful.layout.suit.floating, 	        -- 1
    awful.layout.suit.tile, 		-- 2
    awful.layout.suit.tile.bottom,	-- 3
+   awful.layout.suit.max.fullscreen,
 }
 
 -- {{{ Tags
 -- Define a tag table which hold all screen tags.
 tags = {}
 do
-   local f, t, b = layouts[1], layouts[2], layouts[3]
+   local f, t, b, fs = layouts[1], layouts[2], layouts[3], layouts[4]
    for s = 1, screen.count() do
       -- Each screen has its own tag table.
       tags[s] = awful.tag({ " 𝟏 ", " 𝟐 ", " 𝟑 ", " 𝟒 ", " 𝟓 ", " 𝟔 "}, s,
@@ -183,7 +184,7 @@ globalkeys = awful.util.table.join(
    awful.key({                   }, "XF86Display", function() utility.spawn_in_terminal("scripts/switch-display") end),
    awful.key({                   }, "XF86AudioLowerVolume", function() statusbar.widgets.vol:dec() end),
    awful.key({                   }, "XF86AudioRaiseVolume", function() statusbar.widgets.vol:inc() end),
-   awful.key({ modkey,           }, "l", function() minitray.toggle() end ),
+   awful.key({ modkey,           }, "l", minitray.toggle ),
    awful.key({ modkey,           }, "p", function() menubar.show() end ),
    awful.key({ modkey,           }, "e",   function()
                                               i = 3

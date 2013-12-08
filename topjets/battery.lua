@@ -14,19 +14,19 @@ local function round(n)
 end
 
 function battery.new()
-   icons = { charging = { iconic.lookup_status_icon('battery-000-charging', { preferred_size = pref_size }),
-                          iconic.lookup_status_icon('battery-020-charging', { preferred_size = pref_size }),
-                          iconic.lookup_status_icon('battery-040-charging', { preferred_size = pref_size }),
-                          iconic.lookup_status_icon('battery-060-charging', { preferred_size = pref_size }),
-                          iconic.lookup_status_icon('battery-080-charging', { preferred_size = pref_size }),
-                          iconic.lookup_status_icon('battery-100-charging', { preferred_size = pref_size }) },
-             discharging = { iconic.lookup_status_icon('battery-000', { preferred_size = pref_size }),
-                             iconic.lookup_status_icon('battery-020', { preferred_size = pref_size }),
-                             iconic.lookup_status_icon('battery-040', { preferred_size = pref_size }),
-                             iconic.lookup_status_icon('battery-060', { preferred_size = pref_size }),
-                             iconic.lookup_status_icon('battery-080', { preferred_size = pref_size }),
-                             iconic.lookup_status_icon('battery-full-charged', { preferred_size = pref_size }) },
-             full = iconic.lookup_status_icon('battery-100', { preferred_size = pref_size }) }
+   icons = { charging = { iconic.lookup_status_icon('gpm-battery-000-charging', { preferred_size = pref_size }),
+                          iconic.lookup_status_icon('gpm-battery-020-charging', { preferred_size = pref_size }),
+                          iconic.lookup_status_icon('gpm-battery-040-charging', { preferred_size = pref_size }),
+                          iconic.lookup_status_icon('gpm-battery-060-charging', { preferred_size = pref_size }),
+                          iconic.lookup_status_icon('gpm-battery-080-charging', { preferred_size = pref_size }),
+                          iconic.lookup_status_icon('gpm-battery-100-charging', { preferred_size = pref_size }) },
+             discharging = { iconic.lookup_status_icon('gpm-battery-000', { preferred_size = pref_size }),
+                             iconic.lookup_status_icon('gpm-battery-020', { preferred_size = pref_size }),
+                             iconic.lookup_status_icon('gpm-battery-040', { preferred_size = pref_size }),
+                             iconic.lookup_status_icon('gpm-battery-060', { preferred_size = pref_size }),
+                             iconic.lookup_status_icon('gpm-battery-080', { preferred_size = pref_size }),
+                             iconic.lookup_status_icon('gpm-battery-charged', { preferred_size = pref_size }) },
+             full = iconic.lookup_status_icon('gpm-battery-100', { preferred_size = pref_size }) }
 
    local _widget = wibox.widget.imagebox()
 

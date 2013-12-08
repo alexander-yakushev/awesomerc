@@ -1,3 +1,7 @@
+-- Toggable tray, for those who don't like to see it all the time.
+-- http://awesome.naquadah.org/wiki/Minitray
+-- Usage: after requiring a module, bind minitray.toggle() to a key.
+
 local wibox = require("wibox")
 
 -- Module minitray
