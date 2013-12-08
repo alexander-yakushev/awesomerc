@@ -8,7 +8,7 @@
 -- Note: all validations had been removed due to awesome usage specifics.
 --[[
 Copyright (c) 2006-2007, Kyle Smith
-Modified by Alexander Yakushev, 2010-2012.
+Modified by Alexander Yakushev, 2010-2013.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
