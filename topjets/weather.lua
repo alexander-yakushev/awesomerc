@@ -7,7 +7,7 @@ local lustrous = require('lustrous')
 local format = string.format
 
 local weather = {
-   cmd = "curl -s 'http://free.worldweatheronline.com/feed/weather.ashx?q=%s&format=csv&num_of_days=%s&key=%s' 2> /dev/null",
+   cmd = "curl -s 'http://api.worldweatheronline.com/free/v1/weather.ashx?q=%s&format=csv&num_of_days=%s&key=%s' 2> /dev/null",
    city = private.user.city .. "," .. private.user.country,
    api_key = private.weather.api_key,
    days = 3
