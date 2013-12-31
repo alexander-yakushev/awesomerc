@@ -32,7 +32,8 @@ local cond_mapping = {
    ["with thunder"] = { sym = "☂", icon = 'weather-storm.png' },
    ["Patchy sleet"] = { sym = "☃", icon = 'weather-snow.png' },
    ["snow"] = { sym = "☃", icon = 'weather-snow.png' },
-   ["[Ss]leet"] = { sym = "☃", icon = 'weather-snow.png' }
+   ["[Ss]leet"] = { sym = "☃", icon = 'weather-snow.png' },
+   ["[Ii]ce"] = { sym = "☃", icon = 'weather-snow.png' }
 }
 
 local function command ()
