@@ -28,7 +28,7 @@ function utility.run_once(prg, times)
    end
    times = times or 1
    count_prog =
-      tonumber(awful.util.pread('ps aux | grep "' .. string.gsub(prg, ":", " ") .. '" | grep -v grep | wc -l'))
+      tonumber(awful.util.pread('ps aux | grep "' .. string.gsub(prg, ":", " ") .. '" | grep -v grep | wc -l')) or 0
    if times > count_prog then
       for l = count_prog, times-1 do
          awful.util.spawn_with_shell(prg)

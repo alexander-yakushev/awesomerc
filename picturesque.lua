@@ -27,6 +27,8 @@ local get_url_cmd = "curl -s http://4walled.cc/search.php\\?tags\\=\\&board\\=\\
 local get_img_url_cmd = "curl -s %s 2> /dev/null | grep -m 1 'href=\"http'"
 local fetch_img_cmd = "wget -q %s -O %s 2> /dev/null"
 
+local first_run = true
+
 local function get_random_page_url (f)
    local s = f:read()
    f:close()
@@ -58,6 +60,11 @@ local function get_resolution (resolution)
 end
 
 function picturesque.change_image ()
+   if first_run and picturesque.default_wallpaper then
+      picturesque.callback(picturesque.default_wallpaper)
+   end
+   first_run = false
+
    local name = picturesque.cache_folder .. os.date("%Y_%m_%d_%H_%M") .. ".jpg"
    local w, h = get_aspects(get_resolution(picturesque.resolution))
    asyncshell.request(format(get_url_cmd, w, h, picturesque.sfw and "0" or "\\&"),

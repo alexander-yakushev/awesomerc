@@ -178,8 +178,8 @@ local function create_calendar()
                                             month = cal_month + 1}) - 86400)
    local first_day = os.time({ day = 1, month = cal_month, year = cal_year})
    local first_day_in_week =
-      os.date("%w", first_day)
-   local result = "Su Mo Tu We Th Fr Sa\n"
+      (os.date("%w", first_day) + 6) % 7
+   local result = "Mo Tu We Th Fr Sa Su\n"
    for i = 1, first_day_in_week do
       result = result .. "   "
    end
@@ -276,7 +276,7 @@ function orglendar.show(inc_offset)
    inc_offset = inc_offset or 0
 
    if not data or parse_on_show then
-      parse_agenda()
+      orglendar.parse_agenda()
    end
 
    local save_offset = offset
@@ -288,26 +288,21 @@ function orglendar.show(inc_offset)
    calendar = naughty.notify({ title = header,
                                text = cal_text,
                                timeout = 0, hover_timeout = 0.5,
-                               width = calendar_width * char_width,
+                               position = "bottom_right",
                             })
-   todo = naughty.notify({ title = "TO-DO list",
-                           text = create_todo(),
-                           timeout = 0, hover_timeout = 0.5,
-                           width = (data.maxlen + 3) * char_width,
-                        })
 end
 
 function orglendar.register(widget)
    widget:connect_signal("mouse::enter", function() orglendar.show(0) end)
-   widget:connect_signal("mouse::leave", hide)
+   widget:connect_signal("mouse::leave", orglendar.hide)
    widget:buttons(util.table.join( awful.button({ }, 3, function()
-                                                           parse_agenda()
+                                                           orglendar.parse_agenda()
                                                         end),
                                    awful.button({ }, 4, function()
-                                                           show(-1)
+                                                           orglendar.show(-1)
                                                         end),
                                    awful.button({ }, 5, function()
-                                                           show(1)
+                                                           orglendar.show(1)
                                                         end)))
 end
 
