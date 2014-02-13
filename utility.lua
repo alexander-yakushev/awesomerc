@@ -114,6 +114,7 @@ function utility.add_hover_tooltip(w, f)
                     function(c)
                        local nt = f(w)
                        nt.screen = mouse.screen
+                       nt.position = "bottom_right"
                        w.hover_notification = naughty.notify(nt)
                     end)
    w:connect_signal("mouse::leave",

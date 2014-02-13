@@ -6,13 +6,14 @@ local beautiful = require('beautiful')
 local awesompd = require('awesompd/awesompd')
 local picturesque = require('picturesque')
 local iconic = require('iconic')
+local orglendar = require('orglendar')
 
 local statusbar = { widgets = {}, wiboxes = {} }
 local widgets = statusbar.widgets
 
 local mouse = { LEFT = 1, MIDDLE = 2, RIGHT = 3, WHEEL_UP = 4, WHEEL_DOWN = 5 }
 
-statusbar.position = "top"
+statusbar.position = "right"
 
 local function keymap(...)
    local t = {}
@@ -28,6 +29,12 @@ local function keymap(...)
    return t
 end
 
+local function constrain(widget, size)
+   return wibox.layout.constraint(widget, 'exact', size, size)
+end
+
+local margin = wibox.layout.margin
+
 function statusbar.create(s)
    if not statusbar.initialized then
       statusbar.initialize()
@@ -37,31 +44,62 @@ function statusbar.create(s)
    local I = widgets.separator
    local O = widgets.separator2
 
-   l = { left = { w.menu_icon, O, w.tags[s], O, w.prompt[s] },
-         middle = w.programs[s],
-         right = { O, w.mpd.widget, I, w.kbd, I, w.weather, I, w.net, I,
-                   w.cpu, I, w.mem, I, w.vol, I, w.battery, I, w.time, O }
+   local sound_and_music = wibox.layout.flex.horizontal()
+   sound_and_music:add(w.vol)
+   sound_and_music:add(w.mpd.widget)
+
+   local mem_and_bat = wibox.layout.flex.horizontal()
+   mem_and_bat:add(w.mem)
+   mem_and_bat:add(w.battery)
+
+   local ttime = wibox.layout.align.horizontal()
+   ttime:set_middle(w.time)
+   orglendar.register(w.time)
+
+   local cpu_and_net = wibox.layout.flex.horizontal()
+   cpu_and_net:add(w.cpu)
+   cpu_and_net:add(w.net)
+
+   local menu_centered = wibox.layout.align.horizontal()
+   menu_centered:set_middle(wibox.layout.constraint(w.menu_icon, 'exact', 32, 32))
+
+   local unitybar = topjets.unitybar({ screen = s,
+                                       width = 58,
+                                       fg_normal = "#888888",
+                                       bg_urgent = "#ff000088",
+                                       img_focused = beautiful.taglist_bg_focus,
+                                     })
+
+   l = { top = { O, menu_centered, w.prompt[s], O },
+         middle = unitybar,
+         bottom = { w.weather,
+                    w.net,
+                    w.cpu,
+                    sound_and_music,
+                    mem_and_bat,
+                    ttime
+         }
    }
 
-   local wb = awful.wibox({ position = statusbar.position, screen = s , height = 22 })
+   local wb = awful.wibox({ position = statusbar.position, screen = s, width = 58 })
 
-   -- Widgets that are aligned to the left
-   local left_layout = wibox.layout.fixed.horizontal()
-   for _, v in ipairs(l.left) do
-      left_layout:add(v)
+   -- Widgets that are aligned to the top
+   local top_layout = wibox.layout.fixed.vertical()
+   for _, v in ipairs(l.top) do
+      top_layout:add(v)
    end
 
-   -- Widgets that are aligned to the right
-   local right_layout = wibox.layout.fixed.horizontal()
-   for _, v in ipairs(l.right) do
-      right_layout:add(v)
+   -- Widgets that are aligned to the bottom
+   local bottom_layout = wibox.layout.fixed.vertical()
+   for _, v in ipairs(l.bottom) do
+      bottom_layout:add(wibox.layout.margin(v, 5, 5, 5, 5))
    end
 
    -- Now bring it all together (with the tasklist in the middle)
-   local layout = wibox.layout.align.horizontal()
-   layout:set_left(left_layout)
+   local layout = wibox.layout.align.vertical()
+   layout:set_top(top_layout)
    layout:set_middle(l.middle)
-   layout:set_right(right_layout)
+   layout:set_bottom(bottom_layout)
 
    wb:set_widget(layout)
    statusbar.wiboxes[s] = wb
@@ -79,7 +117,7 @@ function statusbar.initialize()
                       theme = { width = 150 } }
 
    widgets.menu_icon = awful.widget.launcher(
-      { image = iconic.lookup_icon("start-here-arch3", { preferred_size = "24x24",
+      { image = iconic.lookup_icon("start-here-arch3", { preferred_size = "128x128",
                                                          icon_types = { "/start-here/" }}),
         menu = awful.menu(mainmenu) })
 
@@ -93,7 +131,7 @@ function statusbar.initialize()
    widgets.time = wibox.widget.textbox()
    scheduler.register_recurring("topjets.clock", 30,
                                 function()
-                                   widgets.time:set_markup(os.date("%a %d, %H:%M "))
+                                   widgets.time:set_markup(os.date("%a %d\n %H:%M"))
                                 end)
 
    -- CPU widget
@@ -114,9 +152,6 @@ function statusbar.initialize()
    widgets.weather = topjets.weather()
    widgets.weather:buttons(
       keymap({ mouse.LEFT, widgets.weather.update}))
-
-   -- Keyboard widget
-   widgets.kbd = topjets.kbd()
 
    -- Volume widget
    widgets.vol = topjets.volume()

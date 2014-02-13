@@ -142,7 +142,7 @@ function weather.new()
    for _, t in pairs(cond_mapping) do
       local icon_name = t.icon
       t.icon = iconic.lookup_status_icon(icon_name, { preferred_size = "128x128" })
-      t.icon_small = iconic.lookup_status_icon(icon_name, { preferred_size = "24x24" })
+      t.icon_small = iconic.lookup_status_icon(icon_name, { preferred_size = "128x128" })
       if t.icon_night then
          local icon_name_night = t.icon_night
          t.icon_night = iconic.lookup_status_icon(icon_name_night, { preferred_size = "128x128" })
@@ -153,9 +153,13 @@ function weather.new()
    weather.w_icon = wibox.widget.imagebox()
    weather.w_text = wibox.widget.textbox()
 
-   weather._widget = wibox.layout.fixed.horizontal()
-   weather._widget:add(weather.w_icon)
-   weather._widget:add(weather.w_text)
+   weather._widget = wibox.layout.fixed.vertical()
+   local icon_centered = wibox.layout.align.horizontal()
+   icon_centered:set_middle(wibox.layout.constraint(weather.w_icon, 'exact', 40, 40))
+   weather._widget:add (icon_centered)
+   local val_centered = wibox.layout.align.horizontal()
+   val_centered:set_middle(weather.w_text)
+   weather._widget:add (val_centered)
 
    weather.tooltip = {
       title = "NO DATA",

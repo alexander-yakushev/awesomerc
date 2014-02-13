@@ -27,6 +27,7 @@ end
 local function notify_volume(w, state, volume, icon)
    local n = naughty.notify({ title = "Volume: " .. volume .. "%",
                               text = "State: " .. state,
+                              position = "bottom_right",
                               icon = icon, icon_size = 32, timeout = 3,
                               replaces_id = w.notification_id})
    w.notification_id = n.id

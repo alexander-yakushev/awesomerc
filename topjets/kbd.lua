@@ -19,7 +19,7 @@ function kbd.new()
    local kbd_text = wibox.widget.textbox()
 
    local _widget = wibox.layout.fixed.horizontal()
-   _widget:add (kbd_icon)
+   _widget:add (wibox.layout.constraint(kbd_icon, 'exact', 24, 24))
    _widget:add (kbd_text)
 
    kbd_icon:set_image(iconic.lookup_icon("preferences-desktop-locale", { preferred_size = "24x24" } ))

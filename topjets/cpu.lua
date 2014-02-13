@@ -24,7 +24,7 @@ function cpu.new()
    local cpu_text = wibox.widget.textbox()
 
    local _widget = wibox.layout.fixed.horizontal()
-   _widget:add (cpu_icon)
+   _widget:add (wibox.layout.constraint(cpu_icon, 'exact', 24, 24))
    _widget:add (cpu_text)
 
    _widget.cpu_icon = cpu_icon
@@ -92,7 +92,7 @@ function cpu.update(w)
    local temp = utility.slurp("/sys/class/thermal/thermal_zone0/temp", "*line")
    temp = tonumber(temp) / 1000
 
-   local line = string.format(" %d°C", temp)
+   local line = string.format(" %d\n °C", temp)
 
    w.cpu_text:set_markup(line)
    w.cpu_icon:set_image(get_usage_icon(cpu_usage[1]))

@@ -7,5 +7,6 @@ return
    network = require('topjets.network'),
    battery = require('topjets.battery'),
    weather = require('topjets.weather'),
-   kbd = require('topjets.kbd')
+   kbd = require('topjets.kbd'),
+   unitybar = require('topjets.unitybar'),
 }

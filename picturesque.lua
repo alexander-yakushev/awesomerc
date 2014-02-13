@@ -9,6 +9,7 @@
 
 local awful = require('awful')
 local asyncshell = require('asyncshell')
+local theme = require('beautiful')
 local gears = require('gears')
 local format = string.format
 
@@ -60,8 +61,11 @@ local function get_resolution (resolution)
 end
 
 function picturesque.change_image ()
-   if first_run and picturesque.default_wallpaper then
-      picturesque.callback(picturesque.default_wallpaper)
+   if first_run then
+      local default = picturesque.default_wallpaper or theme.wallpaper
+      if default then
+         picturesque.callback(default)
+      end
    end
    first_run = false
 

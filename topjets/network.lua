@@ -5,7 +5,7 @@ local utility = require('utility')
 
 local network = {}
 
-local format = " %s%d ms"
+local format = "%s%d ms"
 local hosts = { "github.com", "195.24.232.203", "128.39.32.2" }
 local short_labels = { "", "^DNS: ", "L: " }
 local labels = { "World", "W/o DNS", "Local" }
@@ -68,16 +68,20 @@ end
 function network.new()
    icons = { small = {}, large = {} }
    for k, v in pairs(icon_names) do
-      icons.small[k] = iconic.lookup_status_icon(v, { preferred_size = "24x24" })
+      icons.small[k] = iconic.lookup_status_icon(v, { preferred_size = "128x128" })
       icons.large[k] = iconic.lookup_status_icon(v, { preferred_size = "128x128" })
    end
 
    local network_icon = wibox.widget.imagebox()
    local network_text = wibox.widget.textbox()
 
-   local _widget = wibox.layout.fixed.horizontal()
-   _widget:add (network_icon)
-   _widget:add (network_text)
+   local _widget = wibox.layout.fixed.vertical()
+   local icon_centered = wibox.layout.align.horizontal()
+   icon_centered:set_middle(wibox.layout.constraint(network_icon, 'exact', 40, 40))
+   _widget:add (icon_centered)
+   local val_centered = wibox.layout.align.horizontal()
+   val_centered:set_middle(network_text)
+   _widget:add (val_centered)
 
    _widget.network_icon = network_icon
    _widget.network_text = network_text

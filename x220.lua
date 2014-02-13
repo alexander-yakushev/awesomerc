@@ -38,7 +38,7 @@ userdir = utility.pslurp("echo $HOME", "*line")
 
 -- Autorun programs
 autorunApps = {
-   "setxkbmap -layout 'us,ua,ru' -variant ',winkeys,winkeys' -option grp:menu_toggle -option compose:ralt -option terminate:ctrl_alt_bksp",
+   "setxkbmap -layout 'us,ru' -variant ',winkeys' -option grp:menu_toggle -option compose:ralt -option terminate:ctrl_alt_bksp",
    'sleep 2; xmodmap ~/.xmodmap'
 }
 
@@ -46,12 +46,12 @@ runOnceApps = {
    'thunderbird',
    'mpd',
    'xrdb -merge ~/.Xresources',
-   'mpdscribble --conf ~/.config/mpdscribble/mpdscribble.conf',
+   'mpdscribble',
    'kbdd',
    '/usr/bin/avfsd -o allow_root -o intr -o sync_read /avfs',
    'owncloud',
    'pulseaudio --start',
-   'redshift -l 60.8:10.7 -m vidmode -g 0.8 -t 6500:5500'
+   'redshift -l 60.8:10.7 -m vidmode -g 0.8 -t 6500:5000'
 }
 
 utility.autorun(autorunApps, runOnceApps)
@@ -65,7 +65,7 @@ lustrous.init { lat = private.user.loc.lat,
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
-beautiful.init(awful.util.getdir("config") .. "/themes/serenity/theme.lua")
+beautiful.init(awful.util.getdir("config") .. "/themes/devotion/theme.lua")
 beautiful.onscreen.init()
 
 -- {{{ Wallpaper
@@ -106,7 +106,7 @@ do
 end
 -- }}}
 
--- Top statusbar
+-- Right statusbar
 for s = 1, screen.count() do
    statusbar.create(s)
 end
@@ -115,7 +115,6 @@ end
 menubar.cache_entries = true
 menubar.app_folders = { "/usr/share/applications/" }
 menubar.show_categories = true
-menubar.prompt_args = { bg_cursor = "#222222" }
 
 -- Interact with snap script
 
@@ -251,8 +250,7 @@ globalkeys = awful.util.table.join(
    awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts,  1) end),
    awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end),
    awful.key({ modkey, "Control" }, "n", awful.client.restore),
-   awful.key({ }, "Print", function () awful.util.spawn("snap " .. os.date("%d%m%Y_%H%M%S")) end ),
-   awful.key({ modkey }, "Print", function () utility.spawn_in_terminal("scripts/snappy") end),
+   awful.key({ }, "Print", function () awful.util.spawn("snap " .. os.date("%Y%m%d_%H%M%S")) end ),
    awful.key({ modkey }, "b", function ()
                                  statusbar.wiboxes[mouse.screen].visible = not statusbar.wiboxes[mouse.screen].visible
                                  local clients = client.get()
@@ -399,11 +397,11 @@ awful.rules.rules = {
                     floating = true } },
    { rule = { class = "Emacs" },
      properties = { tag = tags[screen.count() or 1][3] } },
+   { rule = { class = "Steam" },
+     properties = { tag = tags[screen.count() or 1][4] } },
    { rule = { class = "gimp" },
      properties = { floating = true,
                     tag = tags[screen.count() or 1][6]} },
-   { rule = { class = "gthumb" },
-     properties = { floating = true }},
    { rule = { class = "feh" },
      properties = { floating = true }},
 }
