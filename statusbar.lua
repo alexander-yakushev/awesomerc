@@ -181,7 +181,7 @@ function statusbar.initialize()
    mpd.rdecorator = ""
    mpd.servers = { { server = "localhost",
                      port = 6600 } }
-   mpd:register_buttons({ { "", awesompd.MOUSE_LEFT, mpd:command_toggle() },
+   mpd:register_buttons({ { "", awesompd.MOUSE_LEFT, mpd:command_playpause() },
                           { "Control", awesompd.MOUSE_SCROLL_UP, mpd:command_prev_track() },
                           { "Control", awesompd.MOUSE_SCROLL_DOWN, mpd:command_next_track() },
                           { "", awesompd.MOUSE_SCROLL_UP, mpd:command_volume_up() },
@@ -192,6 +192,7 @@ function statusbar.initialize()
                           { "", "XF86AudioPrev", mpd:command_prev_track() },
                           { "", "XF86AudioNext", mpd:command_next_track() }})
    mpd:run()
+   mpd:init_onscreen_widget({ x = 20, y = -30, font = "helvetica 11" })
    widgets.mpd = mpd
 
    -- Native widgets
