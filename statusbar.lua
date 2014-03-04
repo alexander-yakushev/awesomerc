@@ -4,9 +4,9 @@ local wibox = require('wibox')
 local topjets = require('topjets')
 local beautiful = require('beautiful')
 local awesompd = require('awesompd/awesompd')
-local picturesque = require('picturesque')
 local iconic = require('iconic')
 local orglendar = require('orglendar')
+local smartmenu = require('smartmenu')
 
 local statusbar = { widgets = {}, wiboxes = {} }
 local widgets = statusbar.widgets
@@ -108,18 +108,11 @@ end
 
 function statusbar.initialize()
    -- Menu
-   local mainmenu = { items = {
-                         { 'awesome', { { "change wallpaper", picturesque.change_image },
-                                        { "restart", awesome.restart },
-                                        { "quit", awesome.quit } },
-                           beautiful.awesome_icon},
-                         { "connect to", { } } },
-                      theme = { width = 150 } }
-
-   widgets.menu_icon = awful.widget.launcher(
+   widgets.menu_icon = awful.widget.button(
       { image = iconic.lookup_icon("start-here-arch3", { preferred_size = "128x128",
-                                                         icon_types = { "/start-here/" }}),
-        menu = awful.menu(mainmenu) })
+                                                         icon_types = { "/start-here/" }}) })
+   widgets.menu_icon:buttons(
+      keymap({ mouse.LEFT, function() smartmenu.show() end }))
 
    widgets.separator = wibox.widget.textbox()
    widgets.separator:set_markup("   ")
@@ -144,9 +137,13 @@ function statusbar.initialize()
 
    -- Battery widget
    widgets.battery = topjets.battery()
+   widgets.battery:buttons(
+      keymap({ mouse.LEFT, function() utility.spawn_in_terminal("sudo powertop") end }))
 
    -- Network widget
    widgets.net = topjets.network()
+   widgets.net:buttons(
+      keymap({ mouse.LEFT, function() utility.spawn_in_terminal("sudo wifi-menu") end }))
 
    -- Weather widget
    widgets.weather = topjets.weather()

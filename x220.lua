@@ -29,6 +29,7 @@ local statusbar = require('statusbar')
 local picturesque = require('picturesque')
 
 local lustrous = require('lustrous')
+local smartmenu = require('smartmenu')
 
 -- Map useful functions outside
 calc = utility.calc
@@ -66,7 +67,6 @@ lustrous.init { lat = private.user.loc.lat,
 -- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
 beautiful.init(awful.util.getdir("config") .. "/themes/devotion/theme.lua")
-beautiful.onscreen.init()
 
 -- {{{ Wallpaper
 picturesque.sfw = true
@@ -176,7 +176,7 @@ end
 -- {{{ Key bindings
 globalkeys = awful.util.table.join(
    awful.key({                   }, "XF86Launch1", function() utility.spawn_in_terminal("ncmpc") end),
-   awful.key({                   }, "Scroll_Lock", function() utility.spawn_in_terminal("scripts/omniscript") end),
+   awful.key({                   }, "Scroll_Lock", function() smartmenu.show() end),
    awful.key({                   }, "XF86TouchpadToggle", thinkpad.touchpad.toggle),
    awful.key({                   }, "XF86ScreenSaver", thinkpad.power.screenlock),
    awful.key({                   }, "XF86Battery", function() utility.spawn_in_terminal("sudo scripts/flashmanager") end),
