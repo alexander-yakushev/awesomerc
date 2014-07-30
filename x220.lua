@@ -39,7 +39,7 @@ userdir = utility.pslurp("echo $HOME", "*line")
 
 -- Autorun programs
 autorunApps = {
-   "setxkbmap -layout 'us,ru' -variant ',winkeys' -option grp:menu_toggle -option compose:ralt -option terminate:ctrl_alt_bksp",
+   "setxkbmap -layout 'us,ua,ru' -variant ',winkeys,winkeys' -option grp:menu_toggle -option compose:ralt -option terminate:ctrl_alt_bksp",
    'sleep 2; xmodmap ~/.xmodmap'
 }
 
@@ -247,8 +247,12 @@ globalkeys = awful.util.table.join(
    awful.key({ modkey, "Shift"   }, "l",     function () awful.tag.incnmaster(-1)      end),
    awful.key({ modkey, "Control" }, "h",     function () awful.tag.incncol( 1)         end),
    awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1)         end),
-   awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts,  1) end),
-   awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end),
+   awful.key({ modkey,           }, "space", function ()
+                awful.layout.inc(layouts,  1)
+                naughty.notify { title = "Layout changed",
+                                 text = "Current layout: " .. awful.layout.get(mouse.screen).name,
+                               }
+                                             end),
    awful.key({ modkey, "Control" }, "n", awful.client.restore),
    awful.key({ }, "Print", function () awful.util.spawn("snap " .. os.date("%Y%m%d_%H%M%S")) end ),
    awful.key({ modkey }, "b", function ()
@@ -393,6 +397,9 @@ awful.rules.rules = {
      properties = { tag = tags[screen.count() or 1][1],
                     floating = false} },
    { rule = { class = "Skype" },
+     properties = { tag = tags[screen.count() or 1][1],
+                    floating = true } },
+   { rule = { class = "Viber" },
      properties = { tag = tags[screen.count() or 1][1],
                     floating = true } },
    { rule = { class = "Emacs" },
