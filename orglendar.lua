@@ -17,7 +17,6 @@ local orglendar = { files = {},
                     event_color = theme.fg_urgent or "#FF0000",
                     font = theme.font or 'monospace 8',
                     parse_on_show = true,
-                    calendar_width = 21,
                     limit_todo_length = nil,
                     date_format = "%d-%m-%Y" }
 
@@ -174,8 +173,8 @@ local function create_calendar()
       cal_year = cal_year - 1
    end
 
-   local last_day = os.date("%d", os.time({ day = 1, year = cal_year,
-                                            month = cal_month + 1}) - 86400)
+   local last_day = tonumber(os.date("%d", os.time({ day = 1, year = cal_year,
+                                                     month = cal_month + 1}) - 86400))
    local first_day = os.time({ day = 1, month = cal_month, year = cal_year})
    local first_day_in_week =
       (os.date("%w", first_day) + 6) % 7
@@ -227,7 +226,7 @@ local function create_todo()
          result = result ..
             format('<span weight = "bold" foreground = "%s">%s</span>\n',
                    orglendar.event_color,
-                   pop_spaces("", os.date(date_format, task.date), maxlen))
+                   pop_spaces("", os.date(orglendar.date_format, task.date), maxlen))
       end
       tname = task.name
       limit = maxlen - string.len(task.tags) - 3
@@ -288,21 +287,26 @@ function orglendar.show(inc_offset)
    calendar = naughty.notify({ title = header,
                                text = cal_text,
                                timeout = 0, hover_timeout = 0.5,
-                               position = "bottom_right",
+                               screen = mouse.screen,
                             })
+   todo = naughty.notify({ title = "TO-DO list",
+                           text = create_todo(),
+                           timeout = 0, hover_timeout = 0.5,
+                           screen = mouse.screen,
+                        })
 end
 
 function orglendar.register(widget)
    widget:connect_signal("mouse::enter", function() orglendar.show(0) end)
    widget:connect_signal("mouse::leave", orglendar.hide)
    widget:buttons(util.table.join( awful.button({ }, 3, function()
-                                                           orglendar.parse_agenda()
+                                                   orglendar.parse_agenda()
                                                         end),
                                    awful.button({ }, 4, function()
-                                                           orglendar.show(-1)
+                                                   orglendar.show(-1)
                                                         end),
                                    awful.button({ }, 5, function()
-                                                           orglendar.show(1)
+                                                   orglendar.show(1)
                                                         end)))
 end
 
