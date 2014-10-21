@@ -18,6 +18,7 @@ local quake = require("quake")
 local menubar = require("menubar")
 -- Utility
 local utility = require("utility")
+local currencies = require("currencies")
 -- Dictionary
 local dict = require("dict")
 -- Thinkpad specific features
@@ -34,6 +35,7 @@ local smartmenu = require('smartmenu')
 -- Map useful functions outside
 calc = utility.calc
 notify_at = utility.notify_at
+money = currencies.recalc
 
 userdir = utility.pslurp("echo $HOME", "*line")
 
@@ -69,8 +71,9 @@ lustrous.init { lat = private.user.loc.lat,
 beautiful.init(awful.util.getdir("config") .. "/themes/devotion/theme.lua")
 
 -- {{{ Wallpaper
-picturesque.sfw = true
-scheduler.register_recurring("picturesque", 1800, picturesque.change_image)
+gears.wallpaper.maximized("/home/unlogic/Documents/Pictures/Wallpapers/umbrella.jpg", 1, true)
+-- picturesque.sfw = true
+-- scheduler.register_recurring("picturesque", 1800, picturesque.change_image)
 -- }}}
 
 -- Default system software
@@ -177,7 +180,7 @@ end
 globalkeys = awful.util.table.join(
    awful.key({                   }, "XF86Launch1", function() utility.spawn_in_terminal("ncmpc") end),
    awful.key({                   }, "Scroll_Lock", function() smartmenu.show() end),
-   awful.key({                   }, "XF86TouchpadToggle", thinkpad.touchpad.toggle),
+   -- awful.key({                   }, "XF86TouchpadToggle", thinkpad.touchpad.toggle),
    awful.key({                   }, "XF86ScreenSaver", thinkpad.power.screenlock),
    awful.key({                   }, "XF86Battery", function() utility.spawn_in_terminal("sudo scripts/flashmanager") end),
    awful.key({                   }, "XF86Display", function() utility.spawn_in_terminal("scripts/switch-display") end),

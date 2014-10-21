@@ -10,7 +10,10 @@ local beautiful = require('beautiful')
 local naughty = require('naughty')
 local format = string.format
 
+local module_path = (...):match ("(.+/)[^/]+$") or ""
+
 local awesompd = {}
+
 
 -- Function for checking icons and modules. Checks if a file exists,
 -- and if it does, returns the path to file, nil otherwise.
@@ -22,9 +25,9 @@ end
 
 -- Function for loading modules.
 function awesompd.try_require(module)
-   if awesompd.try_load(awful.util.getdir("config") .. 
-                     "/awesompd/" .. module .. ".lua") then
-      return require('awesompd/' .. module)
+   if awesompd.try_load(awful.util.getdir("config") .. '/'..
+                        module_path .. module .. ".lua") then
+      return require(module_path .. module)
    else
       return require(module)
    end
@@ -1187,8 +1190,17 @@ end
 -- folders. If there is no cover art either returns the default album
 -- cover.
 function awesompd:get_cover(track)
-   return jamendo.try_get_cover(track) or
-   self:try_get_local_cover(track) or self.ICONS.DEFAULT_ALBUM_COVER
+   local radio_cover = nil
+   if self.radio_covers then
+      for station, cover in pairs(self.radio_covers) do
+         if track:match(station) then
+            radio_cover = cover
+            break
+         end
+      end
+   end
+   return radio_cover or jamendo.try_get_cover(track) or
+      self:try_get_local_cover(track) or self.ICONS.DEFAULT_ALBUM_COVER
 end
 
 -- Tries to find an album cover for the track that is currently
@@ -1277,6 +1289,7 @@ function awesompd:init_onscreen_widget(args)
                             height = cover_size,
                             x = x + cover_shift_left,
                             y = y - cover_size/2 + height/2,
+                            visible = false,
                           })
    local cover_img = wibox.widget.imagebox()
    cover_wb:set_widget(cover_img)
@@ -1336,19 +1349,39 @@ function awesompd:init_onscreen_widget(args)
    player_wb:set_widget(top_layout)
 
    function self.onscreen.clear()
-      cover_wb.visible = false
-      player_wb.visible = false
+      scheduler.execute_once(1, function ()
+                                player_wb.visible = false
+                                scheduler.execute_once(1, function ()
+                                                          cover_wb.visible = false
+                                                          end)
+                                end)
    end
 
    function self.onscreen.update()
-      track_text:set_markup(string.format("<span font='%s'>%s\n%s (%s)</span>",
-                                          font, self.current_track.display_name,
-                                          self.current_track.album_name,
-                                          self.current_track.year))
-      status_text:set_markup(string.format("<span font='%s'>%s %s/%s</span>",
-                                           font, self.track_n_count,
-                                           to_minsec(self.track_passed),
-                                           to_minsec(self.current_track.duration)))
+      local title = self.current_track.display_name
+      local year = self.current_track.year
+      if year then
+         year = " (" .. year .. ")"
+      end
+      local album = self.current_track.album_name .. year
+
+      local trim = function (s)
+         local l = utf8.len(s)
+         if l > 40 then
+            return "..." .. utf8.sub(s, l - 38)
+         else
+            return s
+         end
+      end
+
+      track_text:set_markup(
+         awesompd.protect_string(string.format("<span font='%s'>%s\n%s</span>",
+                                               font, trim(title), trim(album))))
+      status_text:set_markup(
+         awesompd.protect_string(string.format("<span font='%s'>%s %s/%s</span>",
+                                               font, self.track_n_count,
+                                               to_minsec(self.track_passed),
+                                               to_minsec(self.current_track.duration))))
       cover_img:set_image(self.current_track.album_cover)
       track_prbar:set_value(self.track_progress)
       if self.status == awesompd.PLAYING then
@@ -1356,8 +1389,12 @@ function awesompd:init_onscreen_widget(args)
       elseif self.status == awesompd.PAUSED then
          pp_button:set_image(self.ICONS.PLAY_BTN)
       end
-      player_wb.visible = true
-      cover_wb.visible = true
+      scheduler.execute_once(1, function ()
+                                player_wb.visible = true
+                                scheduler.execute_once(1, function ()
+                                                          cover_wb.visible = true
+                                                          end)
+                                end)
    end
 
    self.onscreen.clear()

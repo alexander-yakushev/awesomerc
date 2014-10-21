@@ -1,3 +1,4 @@
+local utility = require('utility')
 local wibox = require('wibox')
 local iconic = require('iconic')
 local scheduler = require('scheduler')
@@ -5,20 +6,30 @@ local scheduler = require('scheduler')
 -- Module topjets.cpu
 local memory = {}
 
-local iconic_args = { preferred_size = "24x24", icon_types = { "/actions/" } }
-local icons
+local icons = {}
+local icon_files = { "brasero-disc-00", "brasero-disc-20", "brasero-disc-40",
+                     "brasero-disc-60", "brasero-disc-80", "brasero-disc-100" }
 
 function memory.new()
-   icons = { iconic.lookup_icon("brasero-disc-00", iconic_args),
-             iconic.lookup_icon("brasero-disc-20", iconic_args),
-             iconic.lookup_icon("brasero-disc-40", iconic_args),
-             iconic.lookup_icon("brasero-disc-60", iconic_args),
-             iconic.lookup_icon("brasero-disc-80", iconic_args),
-             iconic.lookup_icon("brasero-disc-100", iconic_args) }
+   for i, f in ipairs(icon_files) do
+      icons[i] = { small = iconic.lookup_icon(f, { preferred_size = "24x24",
+                                                   icon_types = { "/actions/" }}),
+                   large = iconic.lookup_icon(f, { preferred_size = "128x128",
+                                                   icon_types = { "/actions/" }}) }
+   end
 
    local _widget = wibox.widget.imagebox()
    scheduler.register_recurring("memory_update", 10,
                                 function() memory.update(_widget) end)
+   utility.add_hover_tooltip(_widget,
+                             function(w)
+                                local f = string.format
+                                return { title = f("Usage:\t %d%%", w.data.usep),
+                                         text = f("Used:\t %d MB\nFree:\t %d MB\nTotal:\t %d MB",
+                                                  w.data.inuse, w.data.free, w.data.total),
+                                         icon = w.data.icon.large, icon_size = 48,
+                                         timeout = 0 }
+                             end)
    return _widget
 end
 
@@ -52,7 +63,10 @@ function memory.update(w)
    _mem.inuse = _mem.total - _mem.free
    _mem.usep  = math.floor(_mem.inuse / _mem.total * 100)
 
-   w:set_image(get_usage_icon(_mem.usep))
+   w.data = _mem
+   w.data.icon = get_usage_icon(_mem.usep)
+
+   w:set_image(w.data.icon.small)
 end
 
 return setmetatable(memory, { __call = function(_, ...) return memory.new(...) end})

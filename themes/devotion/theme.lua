@@ -31,7 +31,7 @@ theme.border_marked   = "#91231c"
 theme.bg_normal       = "#00000099"
 theme.bg_focus        = "#00000033"
 
-theme.motive          = "#76eec6"
+theme.motive          = "#DBAF5D"
 
 theme.bg_normal_color = "#00000099"
 theme.bg_focus_color  = "#444444"
@@ -63,5 +63,23 @@ if naughty then
 end
 
 theme.icon_theme = "awoken"
+
+-- Onscreen
+local infojets = require("infojets")
+
+local wb = infojets.create_wibox({ x = 20, y = 20, height = 200, width = 220, bg_color = theme.bg_normal })
+local pw = infojets.processwatcher()
+pw:set_process_sorters({ { name = "CPU", sort_by = "pcpu",
+                           ignore = { "defunct", "migration" } },
+                         { name = "Memory", sort_by = "rss",
+                           ignore = { "defunct", "migration" } } })
+pw.current_file = 2
+pw.font = 'DejaVu Sans Mono 10'
+pw.title_font = 'Helvetica 10'
+pw.fg_focus = theme.motive
+pw:calculate_line_count(200)
+pw:run()
+
+wb:set_widget(pw.widget)
 
 return theme

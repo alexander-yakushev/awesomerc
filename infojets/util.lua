@@ -1,15 +1,9 @@
-local capi = { timer = timer }
-local string = string
-local gsub = string.gsub
 local format = string.format
-local type = type
-local tonumber = tonumber
-local error = error
-local scheduler = require('scheduler')
+local gsub = string.gsub
 
-module("infojets.util")
+local util = {}
 
-function pango(text, args, escape_brackets)
+function util.pango(text, args, escape_brackets)
    local font = args.font
    local foreground = args.foreground
    local weight = args.weight
@@ -38,12 +32,7 @@ function pango(text, args, escape_brackets)
    return format(result .. '>%s</span>', text)
 end
 
-function repeat_every(func, seconds)
-   func()
-   scheduler.register_recurring("infojets_timers", seconds, func)
-end
-
-function color_to_r_g_b_a(color)
+function util.color_to_r_g_b_a(color)
    if type(color) == "string" and string.sub(color, 1, 1) == "#" then
       local r = tonumber(string.sub(color, 2, 3), 16) / 256
       local g = tonumber(string.sub(color, 4, 5), 16) / 256
@@ -56,3 +45,5 @@ function color_to_r_g_b_a(color)
       error("E: util.color_to_r_g_b_a: unknown color format")
    end
 end
+
+return util

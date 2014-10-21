@@ -1,4 +1,5 @@
 local menu = require('awful.menu')
+local utility = require('utility')
 local picturesque = require('picturesque')
 
 local smartmenu = {}
@@ -33,6 +34,7 @@ function smartmenu.show()
                                          { "restart", awesome.restart },
                                          { "quit", awesome.quit } } },
                          { '&flashmanager', flashmanager() },
+                         { '&music', function() utility.spawn_in_terminal("ncmpc") end },
                          { '&network', { { "&Both", netpower("on on") },
                                          { "&Ethernet", netpower("on off") },
                                          { "&Wireless", netpower("off on") },

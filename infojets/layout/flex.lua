@@ -5,15 +5,19 @@
 local base = require("wibox.layout.base")
 local fixed = require("wibox.layout.fixed")
 local widget_base = require("wibox.widget.base")
-local table = table
-local pairs = pairs
 local floor = math.floor
 
 ---Dispatch widgets horizontaly, positions are not fixed
-module("infojets.layout.flex")
+local flex = {}
 
 local function round(x)
    return floor(x + 0.5)
+end
+
+local function fit_fixed(dir, widgets, width, height)
+   local l = fixed.get_layout(dir)
+   l.widgets = widgets
+   return l:fit(width, height)
 end
 
 --Difference with original:
@@ -26,7 +30,7 @@ end
 -- @param width The available width.
 -- @param height The available height.
 -- @return The total space needed by the layout.
-function draw_flex(widgets, wibox, cr, width, height)
+function flex.draw_flex(widgets, wibox, cr, width, height)
    local pos = 0
 
    local num = #widgets
@@ -34,15 +38,15 @@ function draw_flex(widgets, wibox, cr, width, height)
    space_per_item = width / num
    --Check if one widget have a width > space_per_item
    local one_item_has_width_bigger_than_space_per_item = false
-   for k, v in pairs(widgets) do
-      widget_width,_ = v:fit(width ,height)
-      if widget_width > space_per_item then
-         one_item_has_width_bigger_than_space_per_item = true
-      end
-   end
-   if one_item_has_width_bigger_than_space_per_item == true then
+   -- for k, v in pairs(widgets) do
+   --    widget_width,_ = v:fit(width ,height)
+   --    if widget_width > space_per_item then
+   --       one_item_has_width_bigger_than_space_per_item = true
+   --    end
+   -- end
+   if one_item_has_width_bigger_than_space_per_item then
       local total_width=0
-      total_width, _ = fixed.fit_fixed(dir, widgets, width, height)
+      total_width, _ = fit_fixed(dir, widgets, width, height)
       local remaining_space = width - total_width
       local separator = remaining_space / (num +1)
       pos=separator
@@ -59,7 +63,7 @@ function draw_flex(widgets, wibox, cr, width, height)
             break
          end
       end
-   elseif one_item_has_width_bigger_than_space_per_item == false then
+   else
       for k, v in pairs(widgets) do
          local x, y, w, h
          widget_width,widget_height = v:fit(width ,height)
@@ -93,11 +97,13 @@ end
 
 local function get_layout()
    local function draw(layout, wibox, cr, width, height)
-      draw_flex(layout.widgets, wibox, cr, width, height)
+      flex.draw_flex(layout.widgets, wibox, cr, width, height)
    end
 
    local function fit(layout, width, height)
-      return fixed.fit_fixed("x", layout.widgets, width, height)
+      local l = fixed.horizontal()
+      l.widgets = layout.widgets
+      return l:fit(width, height)
    end
 
    local ret = widget_base.make_widget()
@@ -119,6 +125,8 @@ end
 --Note:if a widget width is greater than the space per widgets defined, then the
 -- flex layout use the remaining space and calculate the mean space between each
 -- widgets
-function horizontal_middle()
+function flex.horizontal_middle()
    return get_layout()
 end
+
+return flex

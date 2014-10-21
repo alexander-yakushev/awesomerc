@@ -4,21 +4,18 @@
 -- Licensed under WTFPLv2.
 
 local wibox = require("wibox")
-local capi = { screen = screen }
 local theme = require("beautiful")
-local table = table
-local setmetatable = setmetatable
 
-require("infojets.logwatcher")
-require("infojets.util")
-require("infojets.processwatcher")
-require("infojets.jetclock")
-
-module("infojets")
+local infojets = {
+   -- logwatcher = require("infojets.logwatcher"),
+   processwatcher = require("infojets.processwatcher"),
+   -- jetclock = require("infojets.jetclock"),
+   util = require("infojets.util")
+}
 
 local wiboxes = {}
 
-function create_wibox(args)
+function infojets.create_wibox(args)
    local args = args or {}
    local width = args.width or 300
    local height = args.height or 200
@@ -31,19 +28,19 @@ function create_wibox(args)
                         width = width})
    wbox.ontop = ontop
    wbox.visible = visible
-   reposition_wibox(wbox, args)
+   infojets.reposition_wibox(wbox, args)
 
    wiboxes[wbox] = args
    return wbox
 end
 
-function reposition_wibox(wbox, args)
+function infojets.reposition_wibox(wbox, args)
    if not args then
       args = wiboxes[wbox]
    end
 
    local scr = args.screen or 1
-   local scrgeom = capi.screen[scr].geometry --workarea
+   local scrgeom = screen[scr].geometry --workarea
    local width = wbox.width
    local height = wbox.height
    local x = args.x or 0
@@ -63,3 +60,5 @@ function reposition_wibox(wbox, args)
 
    wbox:geometry({ x = x, y = y})
 end
+
+return infojets

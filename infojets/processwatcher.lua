@@ -1,32 +1,18 @@
 local naughty = require('naughty')
-local string = string
-local ipairs = ipairs
 local awful = require('awful')
-local setmetatable = setmetatable
-local table = table
-local io = io
-local os = os
-local type = type
-local math = math
-local tonumber = tonumber
 local join = awful.util.table.join
 local wibox = require("wibox")
 local theme = require("beautiful")
 local util = require("infojets.util")
-local terminal = terminal or "xterm"
 local pango = util.pango
-local log = require("gears.debug")
-local tostring = tostring
-local scheduler = scheduler
+local scheduler = require('scheduler')
+local flex = require("infojets.layout.flex")
 
-module("infojets.processwatcher")
-
-default = {}
-default.max_line_count = 100
+local processwatcher = { default = { max_line_count = 100} }
 
 local menu = nil
 
-function set_process_sorters(w, sorters)
+local function set_process_sorters(w, sorters)
    for _, s in ipairs(sorters) do
       local req = 'ps -eo pid,comm,pcpu,pmem --sort ' .. s.sort_by
       table.insert(w.source_files, { name = s.name,
@@ -35,9 +21,9 @@ function set_process_sorters(w, sorters)
    end
 end
 
-function init_widgets(w)
+local function init_widgets(w)
    local ui = {}
-   local title_bar = wibox.layout.flex.horizontal()
+   local title_bar = flex.horizontal_middle()--wibox.layout.flex.horizontal()
    ui.title_bar = {}
 
    local mouse_wheel = join(awful.button({ }, 4,
@@ -102,38 +88,15 @@ function init_widgets(w)
    altogether:set_first(title_bar)
    altogether:set_second(log_textbox)
    w.ui = ui
-   w.widget = altogether
+   local v_margin = 6
+   local with_margins = wibox.layout.margin
+   -- ver_layout:add(with_margins(track_text, 0, 0, v_margin, 0))
+   -- ver_layout:add(with_margins(track_prbar, 0, 10, v_margin, 0))
+   -- ver_layout:add(with_margins(bottom_layout, 0, 0, v_margin, 0))
+   w.widget = with_margins(altogether, 10, 10, 5, 5)
 end
 
-function new()
-   w = {}
-   w.source_files = {}
-   w.data = {}
-   w.max_line_count = default.max_line_count
-   w.current_file = default.current_file or 1
-   w.line_count = 5
-   w.font = 'sans 8'
-   w.title_font = 'sans 8'
-   w.scroll_step = 2
-   w.line_length = 30
-   w.fg_normal = theme.fg_normal
-   w.fg_focus = theme.motive
-
-   w.set_process_sorters = set_process_sorters
-   w.run = run
-   w.update = update
-   w.get_last_lines = get_last_lines
-   w.init_widgets = init_widgets
-   w.get_result_string = get_result_string
-   w.refresh = refresh
-   w.calculate_line_count = calculate_line_count
-   w.show_in_terminal = show_in_terminal
-   w.current_filedata = current_filedata
-   w.create_kill_menu = create_kill_menu
-   return w
-end
-
-function run(w)
+function processwatcher.run(w)
    for i, f in ipairs(w.source_files) do
       w.data[f.name] = { lines = {}, shift = 0,
                          mask = f.mask,
@@ -149,7 +112,34 @@ function run(w)
                                       w:update(f.name)
                                    end
                                 end)
-   -- util.repeat_every(, 10)
+end
+
+function processwatcher.new()
+   w = {}
+   w.source_files = {}
+   w.data = {}
+   w.max_line_count = processwatcher.default.max_line_count
+   w.current_file = processwatcher.default.current_file or 1
+   w.line_count = 5
+   w.font = 'sans 8'
+   w.title_font = 'sans 8'
+   w.scroll_step = 2
+   w.line_length = 30
+   w.fg_normal = theme.fg_normal
+   w.fg_focus = theme.motive
+
+   w.set_process_sorters = set_process_sorters
+   w.run = processwatcher.run
+   w.update = update
+   w.get_last_lines = get_last_lines
+   w.init_widgets = init_widgets
+   w.get_result_string = get_result_string
+   w.refresh = refresh
+   w.calculate_line_count = calculate_line_count
+   w.show_in_terminal = show_in_terminal
+   w.current_filedata = current_filedata
+   w.create_kill_menu = create_kill_menu
+   return w
 end
 
 function trasform_line(line, mask)
@@ -251,7 +241,8 @@ end
 
 function show_in_terminal(w)
    local req = w:current_filedata().request
-   awful.util.spawn(terminal .. " -e '" .. req .. " | tac | less'")
+   local run = software.terminal_cmd or "xterm -e "
+   awful.util.spawn(run .. "sh -c '" .. req .. " | tac | less'")
 end
 
 function refresh(w)
@@ -273,3 +264,5 @@ function calculate_line_count(w, wbox_height)
    local real_height = wbox_height - titlebar_font_size
    w.line_count = math.floor(real_height / (theme.get_font_height(w.font) * 1.1)) + 1
 end
+
+return setmetatable(processwatcher, { __call = function(_, ...) return processwatcher.new(...) end})

@@ -136,7 +136,12 @@ function statusbar.initialize()
    widgets.mem = topjets.memory()
 
    -- Battery widget
-   widgets.battery = topjets.battery()
+   widgets.battery = topjets.battery({{ name = "ThinkPad X220", primary = true,
+                                        interval = 10, update_fn = topjets.battery.get_local },
+                                      { name = "OnePlus One", addr = "192.168.1.142:5555",
+                                        interval = 1800, update_fn = topjets.battery.get_via_adb,
+                                        charge = "capacity", status = "status" },
+                                     })
    widgets.battery:buttons(
       keymap({ mouse.LEFT, function() utility.spawn_in_terminal("sudo powertop") end }))
 
@@ -173,6 +178,7 @@ function statusbar.initialize()
    mpd.show_album_cover = true
    mpd.browser = software.browser
    mpd.mpd_config = userdir .. "/.mpdconf"
+   mpd.radio_covers = { ["listen.42fm.ru"] = "/home/unlogic/awesome/themes/devotion/stream_covers/42fm.jpg" }
    mpd.album_cover_size = 50
    mpd.ldecorator = " "
    mpd.rdecorator = ""
