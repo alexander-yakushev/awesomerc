@@ -32,6 +32,8 @@ local picturesque = require('picturesque')
 local lustrous = require('lustrous')
 local smartmenu = require('smartmenu')
 
+local rulez = require('rulez')
+
 -- Map useful functions outside
 calc = utility.calc
 notify_at = utility.notify_at
@@ -311,6 +313,7 @@ clientkeys = awful.util.table.join(
    awful.key({ modkey, "Shift"   }, "c",      function (c) c:kill()                         end),
    awful.key({ modkey, "Control" }, "space",  awful.client.floating.toggle                     ),
    awful.key({ modkey,           }, "o",      smart_movetoscreen                        ),
+   awful.key({ modkey,           }, "q",      rulez.remember),
    awful.key({ modkey,           }, "t",      function (c) c.ontop = not c.ontop            end),
    awful.key({ modkey,           }, "n",
              function (c)
@@ -415,6 +418,8 @@ awful.rules.rules = {
    { rule = { class = "feh" },
      properties = { floating = true }},
 }
+
+rulez.init()
 -- }}}
 
 -- {{{ Signals
