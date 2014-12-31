@@ -7,7 +7,12 @@ local naughty = require('naughty')
 local utility = {}
 
 function utility.slurp(file, mode)
-   local handler = io.open(file, 'r')
+   local handler
+   if type(file) == "userdata" then
+      handler = file
+   else
+      handler = io.open(file, 'r')
+   end
    local result = handler:read(mode or "*all")
    handler:close()
    return result
@@ -126,4 +131,44 @@ function utility.add_hover_tooltip(w, f)
                     end)
 end
 
+function utility.keymap(...)
+   local arg = {...}
+   local i = 1
+   local result
+   if type(arg[1]) ~= "string" then
+      result = arg[1]
+      i = 2
+   else
+      result = {}
+   end
+   while i < #arg do
+      local key = arg[i]
+      local cb = arg[i+1]
+      local modifiers = {}
+      for cons in string.gmatch(key, "[^-]+") do
+         table.insert(modifiers, cons)
+      end
+      key = modifiers[#modifiers]
+      modifiers[#modifiers] = nil
+      for i, mod in ipairs(modifiers) do
+         if mod == "C" then
+            modifiers[i] = "Control"
+         elseif mod == "S" then
+            modifiers[i] = "Shift"
+         elseif mod == "M" then
+            modifiers[i] = "Mod4"
+         end
+      end
+      result = awful.util.table.join(result, awful.key(modifiers, key, cb))
+      i = i + 2
+   end
+   return result
+end
+
+function utility.refocus()
+   if client.focus then client.focus:raise() end
+end
+
+-- utility.keymap ( "C-M-s", 3, "C-S-Return", 5, "M-o", 7 )
 return utility
+

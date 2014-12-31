@@ -13,7 +13,7 @@ function log.n(data, tag)
       naughty = require("naughty")
    end
    naughty.notify( { title = tag or "ETDP",
-                     text = log.d_return(data, tag or "data"),
+                     text = log.d_return(data),
                      timeout = 0,
                      screen = mouse.screen})
 end
