@@ -4,9 +4,13 @@
 -- @author Alexander Yakushev
 -- @copyright 2012 Alexander Yakushev
 
--- Module lustrous.sunriseset
-local sunriseset = {}
+-- Module lustrous
+local lustrous = {
+   update_interval = 600
+}
 
+local current_time = nil
+local srs_args
 local rad = math.rad
 local deg = math.deg
 local floor = math.floor
@@ -39,7 +43,7 @@ local function day_of_year(date)
    return n1 - (n2 * n3) + date.day - 30
 end
 
-function sunturn_time(date, rising, latitude, longitude, zenith, local_offset)
+local function sunturn_time(date, rising, latitude, longitude, zenith, local_offset)
    local n = day_of_year(date)
 
    -- Convert the longitude to hour value and calculate an approximate time
@@ -104,7 +108,7 @@ function sunturn_time(date, rising, latitude, longitude, zenith, local_offset)
                     hour = floor(LT), min = frac(LT) * 60})
 end
 
-function sunriseset.get(args)
+local function get(args)
    args = args or {}
    local date = args.date or os.date("*t")
    local lat = args.lat or 0
@@ -119,4 +123,36 @@ function sunriseset.get(args)
    return rise_time, set_time, floor(length), frac(length) * 60
 end
 
-return setmetatable(sunriseset, { __call = function(_, ...) return sunriseset.get(...) end })
+function lustrous.get_time(args)
+   local now = os.time()
+   local rise, set = get(args or srs_args)
+
+   local new_time
+   if now > rise and now < set then -- After sunrise, before sunset
+      return "day", rise, set
+   else
+      return "night", rise, set
+   end
+end
+
+function lustrous.update_time(args)
+   local new_time = lustrous.get_time(args)
+
+   if current_time and current_time ~= new_time then
+      lustrous:emit_signal("lustrous::time_changed")
+   end
+
+   current_time = new_time
+end
+
+function lustrous.init(args)
+   srs_args = args
+   if scheduler then
+      scheduler.register_recurring("lustrous_check_time",
+                                   lustrous.update_interval,
+                                   lustrous.update_time)
+   end
+   return current_time
+end
+
+return lustrous

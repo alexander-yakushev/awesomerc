@@ -46,7 +46,6 @@ theme.fg_minimize     = "#ffffff"
 theme.fg_onscreen     = "#7f7f7f"
 
 theme.taglist_bg_focus = res("taglist/bg_focus.png")
-theme.wallpaper = res("background.jpg")
 
 -- Configure naughty
 if naughty then
