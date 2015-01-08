@@ -104,6 +104,15 @@ end
 
 -- ChillCode
 
+local function existing_screen(s)
+   if s > screen.count() then
+      return 1
+   else
+      return s
+   end
+
+end
+
 function rulez.apply()
    local t = {}
    for _, v in ipairs(rulez.static_rules) do
@@ -112,7 +121,7 @@ function rulez.apply()
    for _, v in ipairs(rulez.dynamic_rules) do
       local tdata = v.properties.tag
       if tdata ~= nil then
-         table.insert(t, { rule = v.rule, properties = { tag = tags[tdata[1]][tdata[2]] }})
+         table.insert(t, { rule = v.rule, properties = { tag = tags[existing_screen(tdata[1])][tdata[2]] }})
       end
    end
    awful.rules.rules = t
