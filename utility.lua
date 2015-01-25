@@ -145,6 +145,7 @@ function utility.keymap(...)
       local key = arg[i]
       local cb = arg[i+1]
       local modifiers = {}
+      local make = awful.key
       for cons in string.gmatch(key, "[^-]+") do
          table.insert(modifiers, cons)
       end
@@ -159,7 +160,14 @@ function utility.keymap(...)
             modifiers[i] = "Mod4"
          end
       end
-      result = awful.util.table.join(result, awful.key(modifiers, key, cb))
+      if key == "LMB" then
+         key = 1
+         make = awful.button
+      elseif key == "RMB" then
+         key = 3
+         make = awful.button
+      end
+      result = awful.util.table.join(result, make(modifiers, key, cb))
       i = i + 2
    end
    return result

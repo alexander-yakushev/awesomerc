@@ -269,10 +269,10 @@ for i = 1, keynumber do
    )
 end
 
-clientbuttons = awful.util.table.join(
-   awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
-   awful.button({ modkey }, 1, awful.mouse.client.move),
-   awful.button({ modkey }, 3, awful.mouse.client.resize))
+clientbuttons = utility.keymap(
+   "LMB", function (c) client.focus = c; c:raise() end,
+   "M-LMB", awful.mouse.client.move,
+   "M-RMB", awful.mouse.client.resize)
 
 statusbar.widgets.mpd:append_global_keys()
 root.keys(globalkeys)
