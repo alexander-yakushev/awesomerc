@@ -31,8 +31,9 @@ theme.border_marked   = "#91231c"
 theme.bg_normal       = "#00000099"
 theme.bg_focus        = "#00000033"
 
+theme.motive          = "#82ee76" -- spring
 -- theme.motive          = "#dbaf5d" -- autumn
-theme.motive          = "#76eec6" -- winter
+-- theme.motive          = "#76eec6" -- winter
 
 theme.bg_normal_color = "#00000099"
 theme.bg_focus_color  = "#444444"
