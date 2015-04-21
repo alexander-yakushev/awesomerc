@@ -185,7 +185,9 @@ function statusbar.initialize()
    local f = io.popen("cd /home/unlogic/awesome/themes/devotion/stream_covers/di/; ls")
    for l in f:lines() do
       local t = l:match("(.+)%.png")
-      mpd.radio_covers["di.fm:80/di_" .. t] = "/home/unlogic/awesome/themes/devotion/stream_covers/di/" .. t .. ".png"
+      if t ~= nil then
+         mpd.radio_covers["di.fm:80/di_" .. t] = "/home/unlogic/awesome/themes/devotion/stream_covers/di/" .. t .. ".png"
+      end
    end
    f:close()
    mpd.album_cover_size = 50

@@ -177,6 +177,22 @@ function utility.refocus()
    if client.focus then client.focus:raise() end
 end
 
--- utility.keymap ( "C-M-s", 3, "C-S-Return", 5, "M-o", 7 )
+function utility.conversion(req)
+   local weight = { kg = 1, lbs = 2.20462, oz = 35.274 }
+   local val, metric = string.match(req, "(%d+)%s+(.+)")
+   val = tonumber(val)
+   local result = ""
+   if weight[metric] ~= nil then
+      for m, q in pairs(weight) do
+         if m ~= metric then
+            result = string.format("%s%4.2f\t%s\n", result, val * weight[m] / weight[metric], m)
+         end
+      end
+      result = result:sub(1, #result-1)
+      naughty.notify({ title = string.format("%4.2f\t%s", val, metric),
+                       text = result, timeout = 0 })
+   end
+end
+
 return utility
 

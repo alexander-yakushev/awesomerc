@@ -38,6 +38,7 @@ local rulez = require('rulez')
 calc = utility.calc
 notify_at = utility.notify_at
 money = currencies.recalc
+conv = utility.conversion
 
 userdir = utility.pslurp("echo $HOME", "*line")
 
@@ -48,7 +49,7 @@ autorunApps = {
 }
 
 runOnceApps = {
-   'thunderbird',
+   'hexchat',
    'mpd',
    'xrdb -merge ~/.Xresources',
    'mpdscribble',
@@ -56,7 +57,8 @@ runOnceApps = {
    '/usr/bin/avfsd -o allow_root -o intr -o sync_read /avfs',
    'owncloud',
    'pulseaudio --start',
-   'redshift -l 60.8:10.7 -m vidmode -t 6500:5000'
+   'redshift -l 60.8:10.7 -m vidmode -t 6500:5000',
+   'workrave &!',
 }
 
 utility.autorun(autorunApps, runOnceApps)
@@ -71,24 +73,21 @@ beautiful.init(awful.util.getdir("config") .. "/themes/devotion/theme.lua")
 
 -- Wallpaper
 gears.wallpaper.maximized(beautiful.wallpaper, 1, true)
--- gears.wallpaper.maximized("/home/unlogic/Documents/Pictures/Wallpapers/mirror.jpg", 1, true)
--- picturesque.sfw = true
--- scheduler.register_recurring("picturesque", 1800, picturesque.change_image)
 
 -- Default system software
 software = { terminal = "urxvt",
              terminal_cmd = "urxvt -e ",
-             terminal_quake = "urxvt -pe tabbed",
+             terminal_quake = "urxvt",
              editor = "ec",
              editor_cmd = "ec ",
-             browser = "firefox",
-             browser_cmd = "firefox " }
+             browser = "chromium",
+             browser_cmd = "chromium " }
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 layouts = {
-   awful.layout.suit.floating, 	        -- 1
-   awful.layout.suit.tile, 		-- 2
-   awful.layout.suit.tile.bottom,	-- 3
+   awful.layout.suit.floating,
+   awful.layout.suit.tile,
+   awful.layout.suit.tile.bottom,
    awful.layout.suit.max.fullscreen,
 }
 

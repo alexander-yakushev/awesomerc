@@ -55,9 +55,14 @@ function battery.new(devices)
                                 local function form_dev_str(i)
                                    local dev = battery.devices[i]
                                    local d = w.data[i]
+                                   local onbattery = "\t"
+                                   if d.time_disc ~= nil then
+                                      onbattery = os.date("!%X",os.time() - d.time_disc)
+                                   end
                                    if not d.off then
-                                      return string.format("%s\t%s%%\t\t%s",
+                                      return string.format("%s\t%s%%\t\t%s\t%s",
                                                            dev.name, d.charge,
+                                                           onbattery .. "\t",
                                                            d.status_text or d.status)
                                    end
                                 end
@@ -68,7 +73,7 @@ function battery.new(devices)
                                       text = text .. "\n" .. s
                                    end
                                 end
-                                return { title = "Device\t\tCharge\tStatus", text = text,
+                                return { title = "Device\t\tCharge\tOn battery\tStatus", text = text,
                                          icon = w.data.icon.large, icon_size = 48,
                                          timout = 0 }
                              end)
@@ -96,6 +101,13 @@ function battery.update(w, dev_num, stats)
                              naughty.destroy(n)
                           end})
       end
+      if (w.data[dev_num] ~= nil) and (w.data[dev_num].time_disc == nil) then
+         stats.time_disc = os.time()
+      else
+         stats.time_disc = w.data[dev_num].time_disc
+      end
+   elseif not stats.status:match("Charging") then
+      stats.time_disc = nil
    else
       stats.disable_warning = false
    end
@@ -120,7 +132,7 @@ function battery.get_local(w, dev_num)
    time = time:match(",?%s*(.+)")
    charge = tonumber(charge)
 
-   local icon
+   local icon, time_disconnected
    if status:match("Charging") then
       icon = icons.charging[round(charge / 20) + 1]
    elseif status:match("Discharging") then
