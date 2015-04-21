@@ -7,6 +7,7 @@ local util = require("infojets.util")
 local pango = util.pango
 local scheduler = require('scheduler')
 local flex = require("infojets.layout.flex")
+local utility = require("utility")
 
 local processwatcher = { default = { max_line_count = 100} }
 
@@ -168,9 +169,38 @@ function update(w, file)
    end
 
    local f = io.popen(request)
-   local i, max_size = 1, 0
+   local i = 1
+
+   local processes = {}
    for l in f:lines() do
-      filedata.lines[i] = l
+      local pid, pname, cpu, mem = l:match("([%d]+)%s+([^%s]+)%s+([%d%.]+%.[%d%.]+)%s+([%d%.]+%.[%d%.]+)")
+      if processes[pname] == nil then
+         processes[pname] = { cpu = 0, mem = 0, name = pname, pid = pid }
+      end
+      processes[pname].cpu = processes[pname].cpu + tonumber(cpu)
+      processes[pname].mem = processes[pname].mem + tonumber(mem)
+   end
+   f:close()
+
+   local process_array = {}
+   for _, v in pairs(processes) do
+      table.insert(process_array, v)
+   end
+
+   table.sort(process_array, function (a, b)
+                 if file == 1 then
+                    return a.cpu > b.cpu
+                 else
+                    return a.mem > b.mem
+                 end
+   end)
+
+   for _, p in ipairs(process_array) do
+      filedata.lines[i] = string.format("%d %s%s",
+                                        p.pid,
+                                        utility.pop_spaces(p.name, string.format("%.1f", p.cpu), 19),
+                                        utility.pop_spaces("", string.format("%.1f", p.mem), 6)
+      )
       i = i + 1
    end
 
@@ -209,7 +239,7 @@ function get_result_string(w)
       local res = data[i]
       local l, seen = res[1], res[2]
 
-      _, _, l = string.find(l, "%d+ (.+)")
+      l = string.match(l, "%d+ (.+)")
 
       if #l > w.line_length then
          l = string.sub(l, 1, w.line_length - 3) .. "..."
