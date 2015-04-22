@@ -1,6 +1,6 @@
 local dbg = require('gears.debug')
 
--- Module for centralized registration of recurring and deffered
+-- Module for centralized registration of recurring and deferred
 -- actions.
 -- Creates a global variable called 'scheduler'.
 local scheduler = {}

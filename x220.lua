@@ -2,20 +2,17 @@
 local wibox = require("wibox")
 local gears = require("gears")
 local awful = require("awful")
+local menubar = require("menubar")
+naughty = require("naughty")
+log = require("log")
 scheduler = require('scheduler')
 private = require('private')
 awful.rules = require("awful.rules")
 require("awful.autofocus")
 -- Theme handling library
 local beautiful = require('beautiful')
--- Notification library
-naughty = require("naughty")
--- Logging library
-log = require("log")
 -- Quake console
 local quake = require("quake")
--- Menubar
-local menubar = require("menubar")
 -- Utility
 local utility = require("utility")
 local currencies = require("currencies")
@@ -26,8 +23,6 @@ local thinkpad = require('thinkpad')
 
 local minitray = require('minitray')
 local statusbar = require('statusbar')
-
-local picturesque = require('picturesque')
 
 local lustrous = require('lustrous')
 local smartmenu = require('smartmenu')
