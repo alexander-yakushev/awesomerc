@@ -108,13 +108,32 @@ local function sunturn_time(date, rising, latitude, longitude, zenith, local_off
                     hour = floor(LT), min = frac(LT) * 60})
 end
 
+function lustrous.is_dst(date)
+   if date.month < 3 or date.month > 10 then return false end
+   if date.month > 3 and date.month < 10 then return true end
+
+   local previous_sunday = date.day - date.wday
+
+   if date.month == 3 then return (previous_sunday >= 25) end
+   if date.month == 10 then return (previous_sunday < 25) end
+
+   return false
+end
+
 local function get(args)
    args = args or {}
    local date = args.date or os.date("*t")
    local lat = args.lat or 0
    local lon = args.lon or 0
-   local offset = args.offset or 0
    local zenith = args.zenith or 90.83
+
+   local offset = 0
+   if args.gmt ~= nil then
+      offset = args.gmt
+      if not args.no_dst and lustrous.is_dst(date) then
+         offset = offset + 1
+      end
+   end
 
    local rise_time = sunturn_time(date, true, lat, lon, zenith, offset)
    local set_time = sunturn_time(date, false, lat, lon, zenith, offset)

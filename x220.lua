@@ -9,24 +9,17 @@ scheduler = require('scheduler')
 private = require('private')
 awful.rules = require("awful.rules")
 require("awful.autofocus")
--- Theme handling library
 local beautiful = require('beautiful')
--- Quake console
+
 local quake = require("quake")
--- Utility
 local utility = require("utility")
 local currencies = require("currencies")
--- Dictionary
 local dict = require("dict")
--- Thinkpad specific features
 local thinkpad = require('thinkpad')
-
 local minitray = require('minitray')
 local statusbar = require('statusbar')
-
 local lustrous = require('lustrous')
 local smartmenu = require('smartmenu')
-
 local rulez = require('rulez')
 
 -- Map useful functions outside
@@ -59,9 +52,7 @@ runOnceApps = {
 utility.autorun(autorunApps, runOnceApps)
 
 -- Various initialization
-lustrous.init { lat = private.user.loc.lat,
-                lon = private.user.loc.lon,
-                offset = private.user.time_offset }
+lustrous.init(private.user.loc)
 
 -- Themes define colours, icons, and wallpapers
 beautiful.init(awful.util.getdir("config") .. "/themes/devotion/theme.lua")
