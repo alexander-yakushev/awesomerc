@@ -1,11 +1,8 @@
 local private = {}
 
-private.user = { name = "unlogic",
-                 city = "Gjovik",
-                 country = "Norway",
-                 time_offset = 1,
-                 loc = { lat = 60.79, lon = 10.69 } }
+private.user = { name = "username",
+                 loc = { lat = 51, lon = 5, gmt = 1 }}
 
-private.weather = { api_key = "754d759345a8244fc950d4f7ef17139e" }
+private.weather = { api_key = "api key here" }
 
 return private
