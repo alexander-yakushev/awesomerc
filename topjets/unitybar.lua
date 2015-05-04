@@ -1,6 +1,7 @@
 local wibox = require('wibox')
 local awful = require('awful')
 local iconic = require('iconic')
+local utility = require('utility')
 local theme = require('beautiful')
 
 -- Module topjets.unitybar
@@ -28,12 +29,11 @@ function update_tag(tag, wdg)
          local im = wibox.widget.imagebox()
          im:set_image(c.icon or unitybar.args.default_icon)
          im.client = c
-         im:buttons(awful.util.table.join(
-                       awful.button({}, 1, function()
-                                       awful.tag.viewonly(tag)
-                                       c:raise()
-                                       client.focus = c
-                                           end)))
+         im:buttons(utility.keymap("LMB", function()
+                                      awful.tag.viewonly(tag)
+                                      c:raise()
+                                      client.focus = c
+         end))
          table.insert(visible_clients, im)
          if client.focus == c then
             pivot = #visible_clients
@@ -55,9 +55,8 @@ function update_tag(tag, wdg)
       alignedv:set_middle(aligned)
       local num = wibox.widget.textbox(string.format('<span color="%s">%s</span>',
                                                      unitybar.args.fg_normal, tag.name))
-      middle:buttons(
-         awful.util.table.join(
-            awful.button({}, 1, function() awful.tag.viewonly(tag) end)))
+      middle:buttons(utility.keymap(
+                        "LMB", function() awful.tag.viewonly(tag) end))
       aligned:set_middle(num)
       return
    end

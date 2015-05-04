@@ -7,42 +7,26 @@ local awesompd = require('awesompd/awesompd')
 local iconic = require('iconic')
 local orglendar = require('orglendar')
 local smartmenu = require('smartmenu')
+local keymap = utility.keymap
 
-local statusbar = { widgets = {}, wiboxes = {} }
+local statusbar = { widgets = {}, wiboxes = {},
+                    position = "right" }
 local widgets = statusbar.widgets
-
-local mouse = { LEFT = 1, MIDDLE = 2, RIGHT = 3, WHEEL_UP = 4, WHEEL_DOWN = 5 }
-
-statusbar.position = "right"
-
-local function keymap(...)
-   local t = {}
-   for _, k in ipairs({...}) do
-      local but
-      if type(k[1]) == "table" then
-         but = awful.button(k[1], k[2], k[3])
-      else
-         but = awful.button({}, k[1], k[2])
-      end
-      t = awful.util.table.join(t, but)
-   end
-   return t
-end
 
 local function constrain(widget, size)
    return wibox.layout.constraint(widget, 'exact', size, size)
 end
 
-local margin = wibox.layout.margin
+local function terminal_with(command)
+   return function() utility.spawn_in_terminal(command) end
+end
 
 function statusbar.create(s)
    if not statusbar.initialized then
       statusbar.initialize()
    end
-   local l
    local w = widgets
    local I = widgets.separator
-   local O = widgets.separator2
 
    local sound_and_music = wibox.layout.flex.horizontal()
    sound_and_music:add(w.vol)
@@ -54,34 +38,25 @@ function statusbar.create(s)
 
    local ttime = wibox.layout.align.horizontal()
    ttime:set_middle(w.time)
-   orglendar.register(w.time)
 
    local cpu_and_net = wibox.layout.flex.horizontal()
    cpu_and_net:add(w.cpu)
    cpu_and_net:add(w.net)
 
    local menu_centered = wibox.layout.align.horizontal()
-   menu_centered:set_middle(wibox.layout.constraint(w.menu_icon, 'exact', 32, 32))
+   menu_centered:set_middle(constrain(w.menu_icon, 32))
 
-   local unitybar = topjets.unitybar({ screen = s,
-                                       width = 58,
-                                       fg_normal = "#888888",
-                                       bg_urgent = "#ff000088",
-                                       img_focused = beautiful.taglist_bg_focus,
-                                     })
+   local l = { top = { I, menu_centered, w.prompt[s], I },
+               middle = w.unitybar[s],
+               bottom = { w.weather,
+                          w.net,
+                          w.cpu,
+                          sound_and_music,
+                          mem_and_bat,
+                          ttime
+             } }
 
-   l = { top = { O, menu_centered, w.prompt[s], O },
-         middle = unitybar,
-         bottom = { w.weather,
-                    w.net,
-                    w.cpu,
-                    sound_and_music,
-                    mem_and_bat,
-                    ttime
-         }
-   }
-
-   local wb = awful.wibox({ position = statusbar.position, screen = s, width = 58 })
+   local wb = awful.wibox { position = statusbar.position, screen = s, width = 58 }
 
    -- Widgets that are aligned to the top
    local top_layout = wibox.layout.fixed.vertical()
@@ -111,26 +86,22 @@ function statusbar.initialize()
    widgets.menu_icon = awful.widget.button(
       { image = iconic.lookup_icon("start-here-arch3", { preferred_size = "128x128",
                                                          icon_types = { "/start-here/" }}) })
-   widgets.menu_icon:buttons(
-      keymap({ mouse.LEFT, function() smartmenu.show() end }))
+   widgets.menu_icon:buttons(keymap("LMB", smartmenu.show))
 
    widgets.separator = wibox.widget.textbox()
-   widgets.separator:set_markup("   ")
-
-   widgets.separator2 = wibox.widget.textbox()
-   widgets.separator2:set_markup(" ")
+   widgets.separator:set_markup(" ")
 
    -- Clock widget
    widgets.time = wibox.widget.textbox()
+   orglendar.register(widgets.time)
    scheduler.register_recurring("topjets.clock", 30,
                                 function()
                                    widgets.time:set_markup(os.date("%a %d\n %H:%M"))
-                                end)
+   end)
 
    -- CPU widget
    widgets.cpu = topjets.cpu()
-   widgets.cpu:buttons(
-      keymap({ mouse.LEFT, function() utility.spawn_in_terminal("htop") end }))
+   widgets.cpu:buttons(keymap("LMB", terminal_with("htop")))
 
    -- Memory widget
    widgets.mem = topjets.memory()
@@ -138,50 +109,39 @@ function statusbar.initialize()
    -- Battery widget
    widgets.battery = topjets.battery({{ name = "ThinkPad X220", primary = true,
                                         interval = 10, update_fn = topjets.battery.get_local },
-                                      { name = "OnePlus One", addr = "192.168.1.142:5555",
-                                        interval = 1800, update_fn = topjets.battery.get_via_adb,
-                                        charge = "capacity", status = "status" },
-                                     })
-   widgets.battery:buttons(
-      keymap({ mouse.LEFT, function() utility.spawn_in_terminal("sudo powertop") end }))
+         { name = "OnePlus One", addr = "192.168.1.142:5555",
+           interval = 1800, update_fn = topjets.battery.get_via_adb,
+           charge = "capacity", status = "status" },
+   })
+   widgets.battery:buttons(keymap("LMB", terminal_with("sudo powertop")))
 
    -- Network widget
    widgets.net = topjets.network()
-   widgets.net:buttons(
-      keymap({ mouse.LEFT, function() utility.spawn_in_terminal("sudo wifi-menu") end }))
+   widgets.net:buttons(keymap("LMB", terminal_with("sudo wifi-menu")))
 
    -- Weather widget
    widgets.weather = topjets.weather()
-   widgets.weather:buttons(
-      keymap({ mouse.LEFT, widgets.weather.update}))
+   widgets.weather:buttons(keymap("LMB", widgets.weather.update))
 
    -- Volume widget
    widgets.vol = topjets.volume()
    widgets.vol:buttons(
-      keymap({ mouse.LEFT, function() widgets.vol:mute() end },
-             { mouse.WHEEL_UP, function() widgets.vol:inc() end },
-             { mouse.WHEEL_DOWN, function() widgets.vol:dec() end }))
+      keymap("LMB", function() widgets.vol:mute() end,
+             "WHEELUP", function() widgets.vol:inc() end,
+             "WHEELDOWN", function() widgets.vol:dec() end))
 
    -- MPD widget
    local mpd = awesompd:create()
    awesompd.STOPPED = ""
-   mpd.font = "Liberation Mono"
    mpd.backgroud = "#000000"
    mpd.widget_icon = iconic.lookup_icon("gmpc", { preferred_size = "24x24",
                                                   icon_types = { "/apps/" }})
-   mpd.scrolling = true
-   mpd.output_size = 30
-   mpd.update_interval = 10
    mpd.path_to_icons = beautiful.icon_dir
-   mpd.debug_mode = true
-   mpd.jamendo_format = awesompd.FORMAT_MP3
-   mpd.show_album_cover = true
    mpd.browser = software.browser
    mpd.mpd_config = userdir .. "/.mpdconf"
    mpd.radio_covers = {
       ["listen.42fm.ru"] = "/home/unlogic/awesome/themes/devotion/stream_covers/42fm.jpg",
    }
-   local covers = {}
    local f = io.popen("cd /home/unlogic/awesome/themes/devotion/stream_covers/di/; ls")
    for l in f:lines() do
       local t = l:match("(.+)%.png")
@@ -190,132 +150,35 @@ function statusbar.initialize()
       end
    end
    f:close()
-   mpd.album_cover_size = 50
-   mpd.ldecorator = " "
-   mpd.rdecorator = ""
-   mpd.servers = { { server = "localhost",
-                     port = 6600 } }
    mpd:register_buttons({ { "", awesompd.MOUSE_LEFT, mpd:command_playpause() },
-                          { "Control", awesompd.MOUSE_SCROLL_UP, mpd:command_prev_track() },
-                          { "Control", awesompd.MOUSE_SCROLL_DOWN, mpd:command_next_track() },
-                          { "", awesompd.MOUSE_SCROLL_UP, mpd:command_volume_up() },
-                          { "", awesompd.MOUSE_SCROLL_DOWN, mpd:command_volume_down() },
-                          { "", awesompd.MOUSE_RIGHT, mpd:command_show_menu() },
-                          { "", "XF86AudioPlay", mpd:command_playpause() },
-                          { "", "XF86AudioStop", mpd:command_stop() },
-                          { "", "XF86AudioPrev", mpd:command_prev_track() },
-                          { "", "XF86AudioNext", mpd:command_next_track() }})
+         { "Control", awesompd.MOUSE_SCROLL_UP, mpd:command_prev_track() },
+         { "Control", awesompd.MOUSE_SCROLL_DOWN, mpd:command_next_track() },
+         { "", awesompd.MOUSE_SCROLL_UP, mpd:command_volume_up() },
+         { "", awesompd.MOUSE_SCROLL_DOWN, mpd:command_volume_down() },
+         { "", awesompd.MOUSE_RIGHT, mpd:command_show_menu() },
+         { "", "XF86AudioPlay", mpd:command_playpause() },
+         { "", "XF86AudioStop", mpd:command_stop() },
+         { "", "XF86AudioPrev", mpd:command_prev_track() },
+         { "", "XF86AudioNext", mpd:command_next_track() }})
    mpd:run()
    mpd:init_onscreen_widget({ x = 20, y = -30, font = "helvetica 11" })
    widgets.mpd = mpd
 
+   widgets.unitybar = {}
+
    -- Native widgets
    widgets.prompt = {}
-   widgets.layout = {}
 
-   widgets.tags = {}
-   widgets.tags.buttons = keymap({ mouse.LEFT, awful.tag.viewonly },
-                                 { { modkey }, mouse.LEFT, awful.client.movetotag },
-                                 { mouse.RIGHT, awful.tag.viewtoggle },
-                                 { { modkey }, mouse.RIGHT, awful.client.toggletag },
-                                 { mouse.WHEEL_UP, awful.tag.viewnext },
-                                 { mouse.WHEEL_DOWN, awful.tag.viewprev })
+   for s = 1, screen.count() do
+      widgets.prompt[s] = awful.widget.prompt()
+      widgets.unitybar[s] = topjets.unitybar { screen = s,
+                                               width = 58,
+                                               fg_normal = "#888888",
+                                               bg_urgent = "#ff000088",
+                                               img_focused = beautiful.taglist_bg_focus }
+   end
 
-   widgets.programs = {}
-   statusbar.taskmenu = nil
-   widgets.programs.buttons =
-      keymap({ mouse.LEFT, function (c)
-                  if not c:isvisible() then
-                     awful.tag.viewonly(c:tags()[1])
-                  end
-                  client.focus = c
-                  c:raise()
-                           end },
-                { mouse.RIGHT, function ()
-                     if statusbar.taskmenu then
-                        statusbar.taskmenu:hide()
-                        statusbar.taskmenu = nil
-                     else
-                        statusbar.taskmenu = awful.menu.clients({ width=250 },
-                                                                { callback = function()
-                                                                     statusbar.taskmenu = nil
-                                                                end})
-                     end
-                               end },
-                { mouse.WHEEL_UP, function ()
-                     awful.client.focus.byidx(1)
-                     if client.focus then client.focus:raise() end
-                                  end },
-                { mouse.WHEEL_DOWN, function ()
-                     awful.client.focus.byidx(-1)
-                     if client.focus then client.focus:raise() end
-                                    end })
-
-      for s = 1, screen.count() do
-         widgets.prompt[s] = awful.widget.prompt()
-
-         widgets.layout[s] = awful.widget.layoutbox(s)
-         widgets.layout[s]:buttons(
-            keymap({ mouse.LEFT,       function () awful.layout.inc(layouts, 1) end },
-                   { mouse.RIGHT,      function () awful.layout.inc(layouts, -1) end },
-                   { mouse.WHEEL_UP,   function () awful.layout.inc(layouts, 1) end },
-                   { mouse.WHEEL_DOWN, function () awful.layout.inc(layouts, -1) end }))
-
-         local common = require("awful.widget.common")
-         local function custom_update (w, buttons, label, data, objects)
-            -- update the widgets, creating them if needed
-            w:reset()
-            for i, o in ipairs(objects) do
-               local cache = data[o]
-               local ib, tb, bgb, m, l
-               if cache then
-                  ib = cache.ib
-                  tb = cache.tb
-                  bgb = cache.bgb
-                  m   = cache.m
-               else
-                  ib = wibox.widget.imagebox()
-                  tb = wibox.widget.textbox()
-                  bgb = wibox.widget.background()
-                  m = wibox.layout.margin(tb, 4, 4)
-                  l = wibox.layout.fixed.horizontal()
-
-                  -- All of this is added in a fixed widget
-                  l:fill_space(true)
-                  l:add(ib)
-                  l:add(m)
-
-                  -- And all of this gets a background
-                  bgb:set_widget(l)
-
-                  bgb:buttons(common.create_buttons(buttons, o))
-
-                  data[o] = {
-                     ib = ib,
-                     tb = tb,
-                     bgb = bgb,
-                     m   = m
-                  }
-               end
-
-               local text, bg, bg_image, icon = label(o)
-               -- The text might be invalid, so use pcall
-               text = string.format('<span color="#%s">%s</span>',
-                                    (#o:clients() == 0 and "444444" or "cccccc"),
-                                    text)
-               if not pcall(tb.set_markup, tb, text) then
-                  tb:set_markup("<i>&lt;Invalid text&gt;</i>")
-               end
-               bgb:set_bg(bg)
-               w:add(bgb)
-            end
-         end
-         widgets.tags[s] = awful.widget.taglist(s, awful.widget.taglist.filter.all, widgets.tags.buttons, nil, custom_update)
-
-         widgets.programs[s] = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, widgets.programs.buttons)
-
-         statusbar.initialized = true
-      end
+   statusbar.initialized = true
 end
 
 return statusbar

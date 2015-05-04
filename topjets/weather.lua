@@ -34,10 +34,6 @@ local function condition(icon_name)
    return cond_mapping[icon_name] or cond_mapping["clear-day"]
 end
 
-local function round(temp)
-   return math.floor(temp + 0.5)
-end
-
 local function command ()
    return format (weather.cmd, weather.api_key, weather.lat, weather.lon )
 end
@@ -46,11 +42,11 @@ local function forecast_line (t, today)
    if t == nil then return "ERROR" end
    local day, temp
    if today then
-      day, temp = "Today", format("%d(%d)°C", round(t.temperature),
-                                  round(t.apparentTemperature))
+      day, temp = "Today", format("%d(%d)°C", utility.round(t.temperature),
+                                  utility.round(t.apparentTemperature))
    else
-      day, temp = os.date("%d.%m", t.time), format("%d/%d°C", round(t.temperatureMin),
-                                                   round(t.temperatureMax))
+      day, temp = os.date("%d.%m", t.time), format("%d/%d°C", utility.round(t.temperatureMin),
+                                                   utility.round(t.temperatureMax))
    end
    return format("%s\t%s\t%s %s",
                  day, temp, condition(t.icon).sym, (t.summary or ""))
@@ -78,7 +74,7 @@ end
 function weather.callback (file)
    local w = weather._widget
    w.weather = json.decode(file:read("*all"))
-   weather.w_text:set_markup(format("%d°C", round(w.weather.currently.temperature)))
+   weather.w_text:set_markup(format("%d°C", utility.round(w.weather.currently.temperature)))
    weather.w_icon:set_image(cond_mapping[w.weather.currently.icon].icon or cond_mapping.clear.icon)
    if w.weather.currently then
       weather.update_tooltip(weather._widget)

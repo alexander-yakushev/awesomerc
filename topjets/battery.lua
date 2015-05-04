@@ -15,11 +15,6 @@ local function l_icon(icon_name)
 end
 local icons
 
-local function round(n)
-   local s, f = math.modf(n)
-   if f >= 0.5 then return s + 1 else return s end
-end
-
 function battery.new(devices)
    if (devices == nil) or (#devices == 0) then
       error("topjets.battery.new: need at least one device")
@@ -134,9 +129,9 @@ function battery.get_local(w, dev_num)
 
    local icon, time_disconnected
    if status:match("Charging") then
-      icon = icons.charging[round(charge / 20) + 1]
+      icon = icons.charging[utility.round(charge / 20) + 1]
    elseif status:match("Discharging") then
-      icon = icons.discharging[round(charge / 20) + 1]
+      icon = icons.discharging[utility.round(charge / 20) + 1]
    else
       icon = icons.full
    end

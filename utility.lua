@@ -132,6 +132,7 @@ function utility.add_hover_tooltip(w, f)
 end
 
 function utility.keymap(...)
+   local mouse_buttons = { LMB = 1, MMB = 2, RMB = 3, WHEELUP = 4, WHEELDOWN = 5 }
    local arg = {...}
    local i = 1
    local result
@@ -160,11 +161,8 @@ function utility.keymap(...)
             modifiers[i] = "Mod4"
          end
       end
-      if key == "LMB" then
-         key = 1
-         make = awful.button
-      elseif key == "RMB" then
-         key = 3
+      if mouse_buttons[key] ~= nil then
+         key = mouse_buttons[key]
          make = awful.button
       end
       result = awful.util.table.join(result, make(modifiers, key, cb))
@@ -177,15 +175,41 @@ function utility.refocus()
    if client.focus then client.focus:raise() end
 end
 
+function utility.round(n)
+   local s, f = math.modf(n)
+   if f >= 0.5 then return s + 1 else return s end
+end
+
 function utility.conversion(req)
    local weight = { kg = 1, lbs = 2.20462, oz = 35.274 }
-   local val, metric = string.match(req, "(%d+)%s+(.+)")
+   local distance = { m = 1, ft = 3.28, ml = 0.00062137 }
+   local all_units = { weight, distance }
+   local val, metric = string.match(req, "([%d%.]+)%s*(.+)")
    val = tonumber(val)
+
+   -- Special case for feet inches
+   local feet, inches = string.match(req, "(%d+)'(%d+)")
+   if feet ~= nil then
+      val = feet + (inches / 12)
+      metric = "ft"
+   end
+
    local result = ""
-   if weight[metric] ~= nil then
-      for m, q in pairs(weight) do
+   local units = nil
+   for _, u in ipairs(all_units) do
+      if u[metric] ~= nil then
+         units = u
+      end
+   end
+   if units ~= nil then
+      for m, q in pairs(units) do
          if m ~= metric then
-            result = string.format("%s%4.2f\t%s\n", result, val * weight[m] / weight[metric], m)
+            if m == "ft" then
+               local feet = val * units[m] / units[metric]
+               result = string.format("%s%d'%d\"\n", result, math.floor(feet), utility.round((feet - math.floor(feet)) * 12))
+            else
+               result = string.format("%s%4.2f\t%s\n", result, val * units[m] / units[metric], m)
+            end
          end
       end
       result = result:sub(1, #result-1)
