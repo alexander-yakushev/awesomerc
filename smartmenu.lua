@@ -1,10 +1,6 @@
 local menu = require('awful.menu')
-local utility = require('utility')
-local picturesque = require('picturesque')
 
 local smartmenu = {}
-
---- Flashmanager part
 
 local fm_script = "sudo /home/unlogic/scripts/flashmanager"
 
@@ -20,21 +16,15 @@ local function flashmanager()
    return actions
 end
 
----
-
 local function netpower(action)
    return "sudo /home/unlogic/scripts/netpower " .. action
 end
 
----
-
 function smartmenu.show()
    local mainmenu = { items = {
-                         { '&awesome', { { "change &wallpaper", picturesque.change_image },
-                                         { "restart", awesome.restart },
+                         { '&awesome', { { "restart", awesome.restart },
                                          { "quit", awesome.quit } } },
                          { '&flashmanager', flashmanager() },
-                         { '&music', function() utility.spawn_in_terminal("ncmpc") end },
                          { '&network', { { "&Both", netpower("on on") },
                                          { "&Ethernet", netpower("on off") },
                                          { "&Wireless", netpower("off on") },

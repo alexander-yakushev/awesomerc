@@ -6,7 +6,7 @@ local naughty = require('naughty')
 local dict = {}
 
 local function trim(s)
-   local _, _, res = string.find(s, " *([%w ']+)")
+   local res = string.match(s, " *([%w ']+)")
    return res
 end
 
@@ -17,7 +17,7 @@ function dict.handle_response(resp_file)
                        text = "Request is not valid" })
       return
    end
-   _, _, def_count = string.find(resp_file:read(), "^%d%d%d (%d+)")
+   def_count = string.match(resp_file:read(), "^%d%d%d (%d+)")
    if not def_count then
       naughty.notify({ title = "No definitions found",
                        text = "The word was not found in the dictionary"})

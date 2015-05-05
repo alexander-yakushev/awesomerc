@@ -13,9 +13,11 @@ function utility.slurp(file, mode)
    else
       handler = io.open(file, 'r')
    end
-   local result = handler:read(mode or "*all")
-   handler:close()
-   return result
+   if handler ~= nil then
+      local result = handler:read(mode or "*all")
+      handler:close()
+      return result
+   end
 end
 
 function utility.pslurp(command, mode)

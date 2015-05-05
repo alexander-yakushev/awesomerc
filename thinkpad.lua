@@ -10,8 +10,8 @@ function thinkpad.touchpad.enable(value)
 end
 
 function thinkpad.touchpad.toggle()
-   local _, _, state = string.find(utility.pslurp("synclient -l | grep TouchpadOff",
-                                            "*line"), ".*(%d)$")
+   local state = string.match(utility.pslurp("synclient -l | grep TouchpadOff",
+                                             "*line"), ".*(%d)$")
    state = (state == "0")
    thinkpad.touchpad.enable(not state)
 end

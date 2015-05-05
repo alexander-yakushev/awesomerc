@@ -1,4 +1,5 @@
 local util = require('awful.util')
+local utility = require('utility')
 
 -- Module rcloader
 local rcloader = { default_rc_folder = util.getdir("config"),
@@ -18,12 +19,7 @@ local function n_error(text)
 end
 
 local function read_current_rc_name()
-   local f = io.open(cache_file, 'r')
-   if f then
-      local name = f:read()
-      f:close()
-      return name
-   end
+   return utility.slurp(cache_file, "*line")
 end
 
 function rcloader.load(name)
