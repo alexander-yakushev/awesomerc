@@ -5,7 +5,7 @@ local topjets = require('topjets')
 local beautiful = require('beautiful')
 local awesompd = require('awesompd/awesompd')
 local iconic = require('iconic')
-local orglendar = require('orglendar')
+local calendar = require('calendar')
 local smartmenu = require('smartmenu')
 local keymap = utility.keymap
 
@@ -93,7 +93,7 @@ function statusbar.initialize()
 
    -- Clock widget
    widgets.time = wibox.widget.textbox()
-   orglendar.register(widgets.time)
+   calendar.register(widgets.time)
    scheduler.register_recurring("topjets.clock", 30,
                                 function()
                                    widgets.time:set_markup(os.date("%a %d\n %H:%M"))
