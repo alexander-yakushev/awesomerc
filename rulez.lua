@@ -1,116 +1,66 @@
 local awful = require('awful')
+awful.rules = require('awful.rules')
 
-local rulez = {}
+local rulez = { rules_file = awful.util.getdir("config") .. "/saved_rules.lua" }
 
-local function exportstring(s)
-   return string.format("%q", s)
-end
-
---// The Save Function
-function table.save(tbl, filename)
-   local charS,charE = "   ","\n"
-   local file,err = io.open( filename, "wb" )
-   if err then return err end
-
-   -- initiate variables for save procedure
-   local tables,lookup = { tbl },{ [tbl] = 1 }
-   file:write( "return {"..charE )
-
-   for idx,t in ipairs( tables ) do
-      file:write( "-- Table: {"..idx.."}"..charE )
-      file:write( "{"..charE )
-      local thandled = {}
-
-      for i,v in ipairs( t ) do
-         thandled[i] = true
-         local stype = type( v )
-         -- only handle value
-         if stype == "table" then
-            if not lookup[v] then
-               table.insert( tables, v )
-               lookup[v] = #tables
-            end
-            file:write( charS.."{"..lookup[v].."},"..charE )
-         elseif stype == "string" then
-            file:write(  charS..exportstring( v )..","..charE )
-         elseif stype == "number" then
-            file:write(  charS..tostring( v )..","..charE )
-         end
-      end
-
-      for i,v in pairs( t ) do
-         -- escape handled values
-         if (not thandled[i]) then
-
-            local str = ""
-            local stype = type( i )
-            -- handle index
-            if stype == "table" then
-               if not lookup[i] then
-                  table.insert( tables,i )
-                  lookup[i] = #tables
-               end
-               str = charS.."[{"..lookup[i].."}]="
-            elseif stype == "string" then
-               str = charS.."["..exportstring( i ).."]="
-            elseif stype == "number" then
-               str = charS.."["..tostring( i ).."]="
-            end
-
-            if str ~= "" then
-               stype = type( v )
-               -- handle value
-               if stype == "table" then
-                  if not lookup[v] then
-                     table.insert( tables,v )
-                     lookup[v] = #tables
-                  end
-                  file:write( str.."{"..lookup[v].."},"..charE )
-               elseif stype == "string" then
-                  file:write( str..exportstring( v )..","..charE )
-               elseif stype == "number" then
-                  file:write( str..tostring( v )..","..charE )
-               end
-            end
-         end
-      end
-      file:write( "},"..charE )
+function table.pprint(tbl, spc)
+   local result = ""
+   local pr = function(txt) result = result .. txt end
+   local spaces = function(n)
+      local result = ""
+      for i = 1, n do result = result .. " " end
+      return result
    end
-   file:write( "}" )
-   file:close()
+   local cut = function(i) result = result:sub(1, #result - i) end
+   if type(tbl) == "table" then
+      pr("{ ")
+      spc = (spc or 0) + 2
+      local empty = true
+      if #tbl > 0 then
+         empty = false
+         for i, v in ipairs(tbl) do
+            pr(table.pprint(v, spc))
+            pr(",\n" .. spaces(spc))
+         end
+      end
+      for k, v in pairs(tbl) do
+         if not (type(k) == "number" and k <= #tbl) then
+            empty = false
+            if type(k) == "string" then
+               pr(k)
+            else
+               pr("[")
+               pr(table.pprint(k))
+               pr("]")
+            end
+            pr(" = ")
+            pr(table.pprint(v, spc))
+            pr(",\n" .. spaces(spc))
+         end
+      end
+      if not empty then cut(spc+2) end
+      pr(" }")
+   elseif type(tbl) == "string" then
+      pr(string.format('"%s"', tbl))
+   else
+      pr(tostring(tbl))
+   end
+   return result
 end
 
-function table.load(sfile)
-   local ftables,err = loadfile( sfile )
-   if err then return _,err end
+function table.read(f)
+   local ftables, err = loadfile(f)
+   if err then
+      error("Failed reading rules file: " .. f)
+   end
    local tables = ftables()
-   for idx = 1,#tables do
-      local tolinki = {}
-      for i,v in pairs( tables[idx] ) do
-         if type( v ) == "table" then
-            tables[idx][i] = tables[v[1]]
-         end
-         if type( i ) == "table" and tables[i[1]] then
-            table.insert( tolinki,{ i,tables[i[1]] } )
-         end
-      end
-      -- link indices
-      for _,v in ipairs( tolinki ) do
-         tables[idx][v[2]],tables[idx][v[1]] =  tables[idx][v[1]],nil
-      end
-   end
-   return tables[1]
+   return tables
 end
-
--- ChillCode
 
 local function existing_screen(s)
-   if s > screen.count() then
-      return 1
-   else
-      return s
-   end
-
+   s = s or screen.count()
+   if s > screen.count() then return 1
+   else return s end
 end
 
 function rulez.apply()
@@ -118,28 +68,54 @@ function rulez.apply()
    for _, v in ipairs(rulez.static_rules) do
       table.insert(t, v)
    end
-   for _, v in ipairs(rulez.dynamic_rules) do
-      local tdata = v.properties.tag
-      if tdata ~= nil then
-         table.insert(t, { rule = v.rule, properties = { tag = tags[existing_screen(tdata[1])][tdata[2]] }})
+   for _, v in ipairs(rulez.saved_rules) do
+      local scr = existing_screen(v.properties.screen)
+      local rule = v
+      local tag = v.properties.tag
+      if tag ~= nil then
+         rule.properties.tag = tags[scr][tag]
       end
+      table.insert(t, rule)
    end
    awful.rules.rules = t
 end
 
-function rulez.init(datafile)
-   local datafile = datafile or (awful.util.getdir("cache") .. "/dynamic_rules")
-   rulez.file = datafile
-   rulez.static_rules = awful.rules.rules
-   rulez.dynamic_rules = table.load(datafile)
-   if rulez.dynamic_rules == nil then
-      rulez.dynamic_rules = {}
+function rulez.init(static_rules)
+   rulez.static_rules = static_rules or {}
+   rulez.saved_rules = table.read(rulez.rules_file)
+   if rulez.saved_rules == nil then
+      rulez.saved_rules = {}
    end
    rulez.apply()
 end
 
+local function tag_id(tag)
+   local index = nil
+   for scr = 1, screen.count() do
+      for i, v in ipairs(tags[scr]) do
+         if v == tag then
+            index = i
+            break
+         end
+      end
+   end
+   return index
+end
+
 function rulez.persist()
-   table.save(rulez.dynamic_rules, rulez.file)
+   local rules_data = {}
+   for _, v in ipairs(awful.rules.rules) do
+      if (type(v) == "table") and not (v.rule.class == nil) then
+         local ov = { rule = v.rule,
+                      properties = { floating = v.properties.floating,
+                                     tag = tag_id(v.properties.tag) } }
+         table.insert(rules_data, ov)
+      end
+   end
+   local f = io.open(rulez.rules_file, "w")
+   f:write("return\n")
+   f:write(table.pprint(rules_data))
+   f:close()
 end
 
 function rulez.remember(c)
@@ -150,7 +126,7 @@ function rulez.remember(c)
    local class = c.class
    -- find this rule
    local rule
-   for _, v in ipairs(rulez.dynamic_rules) do
+   for _, v in ipairs(awful.rules.rules) do
       if v.rule.class == class then
          rule = v
          if v.properties.tag ~= nil then
@@ -161,31 +137,22 @@ function rulez.remember(c)
    end
    if rule == nil then
       rule = { rule = { class = class }, properties = {} }
-      table.insert(rulez.dynamic_rules, rule)
+      table.insert(awful.rules.rules, rule)
    end
 
-   local ctag = c:tags()[1]
-   local index = nil;
-   for i, v in ipairs(tags[c.screen]) do
-      if v == ctag then
-         index = i
-         break
-      end
-   end
+   local tag = c:tags()[1]
 
-   local tdata = rule.properties.tag
-
-   if (tdata == nil) or (tdata[1] ~= c.screen) or (tdata[2] ~= index) then
-      rule.properties.tag = { c.screen, index }
+   if (rule.properties.tag == nil or rule.properties.tag ~= tag) then
+      rule.properties.tag = tag
       naughty.notify({ title = "Client: " .. class,
-                       text  = "Bound to tag " .. index .. " on screen " .. c.screen })
+                       text  = "Bound to tag " .. tag_id(tag) })
    else
       rule.properties.tag = nil
+      rule.properties.screen = nil
       naughty.notify({ title = "Client: " .. class,
-                       text  = "Unbound from screen " .. c.screen })
+                       text  = "Unbound from tag " .. tag_id(tag) })
    end
    rulez.persist()
-   rulez.apply()
 end
 
 return rulez

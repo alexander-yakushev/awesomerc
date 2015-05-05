@@ -7,7 +7,6 @@ naughty = require("naughty")
 log = require("log")
 scheduler = require('scheduler')
 private = require('private')
-awful.rules = require("awful.rules")
 require("awful.autofocus")
 local beautiful = require('beautiful')
 
@@ -264,18 +263,13 @@ statusbar.widgets.mpd:append_global_keys()
 root.keys(globalkeys)
 
 -- Rules
-local saved_rules = require("saved_rules")
-awful.rules.rules = awful.util.table.join(
-   { { rule = { },
-       properties = { border_width = beautiful.border_width,
-                      border_color = beautiful.border_normal,
-                      size_hints_honor = false,
-                      focus = true,
-                      keys = clientkeys,
-                      buttons = clientbuttons } } },
-   saved_rules)
-
-rulez.init()
+rulez.init({ { rule = { },
+               properties = { border_width = beautiful.border_width,
+                              border_color = beautiful.border_normal,
+                              size_hints_honor = false,
+                              focus = true,
+                              keys = clientkeys,
+                              buttons = clientbuttons } } })
 
 -- Signals
 client.connect_signal("manage",
