@@ -1,0 +1,26 @@
+* Awesome WM configuration
+
+  This repo contains up-to-date config and code for my local Awesome setup.
+
+  Theme: Devotion
+
+  Screenshot:
+
+  [[https://raw.githubusercontent.com/alexander-yakushev/awesomerc/master/themes/devotion/screenshot.png]]
+
+  Notable features:
+
+  - Unitybar: tag/task sidebar. Inspired by Unity taskbar, fully supports
+    Awesome tags.
+  - Interactive sidebar widgets:
+    + Weather widget with tooltip
+    + Network widget with ping latency tooltip
+    + CPU widget with processes tooltip
+    + Memory, sound and battery widgets
+    + Awesompd widget for Music Player Daemon
+    + Time widget with calendar tooltip
+  - Select any word and =Modkey-== for dictionary lookup
+  - Automatic wallpaper downloader and changer (currently disabled)
+  - Quake-inspired dropdown terminal on =Modkey-Return=
+  - Dynamic rules, bind programs to tags with =Modkey-Q=
+  - For other useful stuff see =x220.lua= and modules it loads.
