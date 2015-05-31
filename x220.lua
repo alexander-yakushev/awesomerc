@@ -196,7 +196,7 @@ globalkeys = utility.keymap(
          awful.util.getdir("cache") .. "/history_eval")
           end,
    -- Miscellaneous
-   "XF86ScreenSaver", thinkpad.power.screenlock,
+   "XF86ScreenSaver", function() os.execute(userdir .. "/scripts/screenlock") end,
    "XF86AudioLowerVolume", function() statusbar.widgets.vol:dec() end,
    "XF86AudioRaiseVolume", function() statusbar.widgets.vol:inc() end,
    "M-l", minitray.toggle,
@@ -220,7 +220,7 @@ clientkeys = utility.keymap(
    "M-n", function (c) c.minimized = true end,
    "M-m", function (c)
       c.maximized_horizontal = not c.maximized_horizontal
-      c.maximized_vertical   = not c.maximized_vertical
+3      c.maximized_vertical   = not c.maximized_vertical
           end
 )
 
