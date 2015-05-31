@@ -101,7 +101,11 @@ function statusbar.initialize()
 
    -- CPU widget
    widgets.cpu = topjets.cpu()
-   widgets.cpu:buttons(keymap("LMB", terminal_with("htop")))
+   topjets.processwatcher.register(widgets.cpu)
+   widgets.cpu:buttons(keymap("LMB", terminal_with("htop"),
+                              "RMB", topjets.processwatcher.toggle_kill_menu,
+                              "WHEELUP", function() topjets.processwatcher.switch_sorter(-1) end,
+                              "WHEELDOWN", function() topjets.processwatcher.switch_sorter(1) end))
 
    -- Memory widget
    widgets.mem = topjets.memory()

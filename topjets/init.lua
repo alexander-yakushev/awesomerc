@@ -9,4 +9,5 @@ return
    weather = require('topjets.weather'),
    kbd = require('topjets.kbd'),
    unitybar = require('topjets.unitybar'),
+   processwatcher = require('topjets.processwatcher')
 }
