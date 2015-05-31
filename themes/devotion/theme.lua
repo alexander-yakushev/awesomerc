@@ -7,7 +7,7 @@ local function res(res_name)
    return theme.theme_dir .. "/" .. res_name
 end
 
-theme.name = "Devotion 0.1"
+theme.name = "Devotion 1.0"
 theme.theme_dir = util.getdir("config") .. "/themes/devotion"
 
 theme.wallpaper     = res("background.jpg")
@@ -31,7 +31,8 @@ theme.border_marked   = "#91231c"
 theme.bg_normal       = "#00000099"
 theme.bg_focus        = "#00000033"
 
-theme.motive          = "#82ee76" -- spring
+-- theme.motive          = "#82ee76" -- spring
+theme.motive          = "#E67B50" -- summer
 -- theme.motive          = "#dbaf5d" -- autumn
 -- theme.motive          = "#76eec6" -- winter
 
