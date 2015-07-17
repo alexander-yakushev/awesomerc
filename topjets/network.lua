@@ -6,30 +6,20 @@ local utility = require('utility')
 local network = {}
 
 local format = "%s%d ms"
-local hosts = { "github.com", "195.24.232.203", "128.39.32.2" }
-local short_labels = { "", "^DNS: ", "L: " }
-local labels = { "World", "W/o DNS", "Local" }
-local tooltip = {
-   title = "Network\t\tLatency\t\tLoss",
-   timeout = 0,
-   icon_size = 48 }
+local hosts = { "github.com", "195.24.232.203", "188.130.220.1", "192.168.1.1" }
+local short_labels = { "", "!DNS: ", "L: ", "R: " }
+local labels = { "World", "W/o DNS", "Local", "Router" }
+local tooltip = { title = "Network\t\tLatency\t\tLoss",
+                  timeout = 0,
+                  icon_size = 48 }
 
-local icon_names = { connected = "network-transmit-receive",
+local icon_names = { wired = "network-transmit-receive",
                      wireless = "network-wireless-signal-excellent",
                      disconnected = "network-offline" }
 
 local function connection_callback(w, type)
-   local icon
-   if type == "wired" then
-      icon = "connected"
-   elseif type == "wireless" then
-      icon = "wireless"
-   else
-      icon = "disconnected"
-   end
-
-   w.network_icon:set_image(icons.small[icon])
-   tooltip.icon = icons.large[icon]
+   w.network_icon:set_image(icons.small[type])
+   tooltip.icon = icons.large[type]
    if type == "none" then
       w.network_text:set_markup("")
    end
