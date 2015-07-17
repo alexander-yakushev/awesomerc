@@ -1,6 +1,6 @@
 return
-{ { properties = { tag = 1,
-      floating = true },
+{ { properties = { floating = true,
+      tag = 1 },
     rule = { class = "Skype" } },
   { properties = { tag = 1 },
     rule = { class = "Viber" } },

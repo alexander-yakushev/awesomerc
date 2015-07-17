@@ -14,7 +14,6 @@ local quake = require("quake")
 local utility = require("utility")
 local currencies = require("currencies")
 local dict = require("dict")
-local thinkpad = require('thinkpad')
 local minitray = require('minitray')
 local statusbar = require('statusbar')
 local lustrous = require('lustrous')
@@ -45,7 +44,7 @@ runOnceApps = {
    'owncloud',
    'pulseaudio --start',
    'redshift -l 60.8:10.7 -m vidmode -t 6500:5000',
-   'workrave &!',
+   -- 'workrave &!',
 }
 
 utility.autorun(autorunApps, runOnceApps)
@@ -220,7 +219,7 @@ clientkeys = utility.keymap(
    "M-n", function (c) c.minimized = true end,
    "M-m", function (c)
       c.maximized_horizontal = not c.maximized_horizontal
-3      c.maximized_vertical   = not c.maximized_vertical
+      c.maximized_vertical   = not c.maximized_vertical
           end
 )
 
