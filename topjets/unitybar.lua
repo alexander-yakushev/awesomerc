@@ -91,11 +91,25 @@ function update_tag(tag, wdg)
       local alignedv = wibox.layout.align.vertical()
       local aligned = wibox.layout.align.horizontal()
       middle:set_middle(alignedv)
+      local rowstack = wibox.layout.fixed.vertical()
+      local first_row = wibox.layout.fixed.horizontal()
       alignedv:set_middle(aligned)
-      local back = wibox.layout.fixed.horizontal()
-      aligned:set_middle(back)
-      for i = 1, ((#visible_clients > 3) and 3 or #visible_clients) do
-         back:add(constrain(visible_clients[i], 19))
+      aligned:set_middle(rowstack)
+      rowstack:add(first_row)
+      if #visible_clients <= 3 then
+         for i = 1, #visible_clients do
+            first_row:add(constrain(visible_clients[i], 19))
+         end
+      else
+         local second_row = wibox.layout.fixed.horizontal()
+         rowstack:add(second_row)
+         local num_cli = ((#visible_clients > 6) and 6 or #visible_clients)
+         for i = 1, math.ceil(num_cli / 2) do
+            first_row:add(constrain(visible_clients[i], 19))
+         end
+         for i = math.ceil(num_cli / 2) + 1, num_cli do
+            second_row:add(constrain(visible_clients[i], 19))
+         end
       end
    end
 end

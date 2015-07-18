@@ -48,7 +48,7 @@ local function latency_callback(w, data)
    update_tooltip(data)
    for i = 1, #hosts do
       if data[hosts[i]].loss ~= 100 then
-         w.network_text:set_markup(string.format(format, short_labels[i], data[hosts[i]].time))
+         w.network_text:set_markup(string.format(format, short_labels[i], math.floor(data[hosts[i]].time)))
          return
       end
    end
