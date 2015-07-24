@@ -1,14 +1,15 @@
 local awful = require("awful")
 local format = string.format
 local theme = require("beautiful")
-local naughty = require("naughty")
 local utility = require("utility")
+local iconic = require("iconic")
 
 local calendar = { text_color = theme.fg_normal or "#FFFFFF",
                    today_color = theme.fg_focus or "#00FF00",
                    font = theme.font or 'monospace 8' }
 
 local offset = 0
+local widget = nil
 
 local function create_calendar()
    local now = os.date("*t")
@@ -61,34 +62,30 @@ local function create_calendar()
                          calendar.font, calendar.text_color, result)
 end
 
-function calendar.hide()
-   if calendar.box ~= nil then
-      naughty.destroy(calendar.box)
-      calendar.box = nil
+function calendar.switch_month(dx)
+   if dx == 0 then
       offset = 0
+   else
+      offset = offset + dx
+   end
+   if widget ~= nil then
+      widget:emit_signal("mouse::leave")
+      widget:emit_signal("mouse::enter")
    end
 end
 
-function calendar.show(inc_offset)
-   inc_offset = inc_offset or 0
-   local save_offset = offset
-   calendar.hide()
-   offset = save_offset + inc_offset
-
-   local header, cal_text = create_calendar()
-   calendar.box = naughty.notify({ title = header,
-                                   text = cal_text,
-                                   timeout = 0, hover_timeout = 0.5,
-                                   screen = mouse.screen })
-end
-
-function calendar.register(widget)
-   widget:connect_signal("mouse::enter", function() calendar.show(0) end)
-   widget:connect_signal("mouse::leave", calendar.hide)
-   widget:buttons(utility.keymap(
-                     "LMB", function() awful.util.spawn(software.browser_cmd .. "calendar.google.com", false) end,
-                     "WHEELUP", function() calendar.show(-1) end,
-                     "WHEELDOWN", function() calendar.show(1) end))
+function calendar.register(w)
+   widget = w
+   local icon = iconic.lookup_app_icon("evolution-calendar2",
+                                       { preferred_size = "128x128" })
+   utility.add_hover_tooltip(
+      w, function(w)
+         local header, cal_text = create_calendar()
+         return { title = header,
+                  text = cal_text,
+                  timeout = 0, hover_timeout = 0.5,
+                  icon = icon, icon_size = 48 }
+   end)
 end
 
 return calendar

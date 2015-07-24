@@ -94,6 +94,14 @@ function statusbar.initialize()
    -- Clock widget
    widgets.time = wibox.widget.textbox()
    calendar.register(widgets.time)
+
+   widgets.time:buttons(
+      keymap("LMB", function() awful.util.spawn(software.browser_cmd ..
+                                                "calendar.google.com", false) end,
+             "MMB", function() calendar.switch_month(0) end,
+             "WHEELUP", function() calendar.switch_month(-1) end,
+             "WHEELDOWN", function() calendar.switch_month(1) end))
+
    scheduler.register_recurring("topjets.clock", 30,
                                 function()
                                    widgets.time:set_markup(os.date("%a %d\n %H:%M"))
