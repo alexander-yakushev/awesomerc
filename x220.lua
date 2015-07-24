@@ -196,6 +196,8 @@ globalkeys = utility.keymap(
           end,
    -- Miscellaneous
    "XF86ScreenSaver", function() os.execute(userdir .. "/scripts/screenlock") end,
+   "XF86MonBrightnessDown", function() os.execute("xbacklight -10") end,
+   "XF86MonBrightnessUp", function() os.execute("xbacklight +10") end,
    "XF86AudioLowerVolume", function() statusbar.widgets.vol:dec() end,
    "XF86AudioRaiseVolume", function() statusbar.widgets.vol:inc() end,
    "M-l", minitray.toggle,
