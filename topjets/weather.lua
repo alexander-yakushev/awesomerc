@@ -67,7 +67,7 @@ function weather.update_tooltip (w)
    local _, rise, set = lustrous.get_time()
    local len = (set - rise) / 60
    text = text .. format('\n\n☼ %s\t☽ %s\t☉ %s',
-                         os.date("%H:%M", rise), os.date("%H:%M", set), math.floor(len / 60) .. ":" .. len % 60)
+                         os.date("%H:%M", rise), os.date("%H:%M", set), math.floor(len / 60) .. ":" .. math.floor(len % 60))
    weather.tooltip.text = text
 end
 
