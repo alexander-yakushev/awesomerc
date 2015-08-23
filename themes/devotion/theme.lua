@@ -10,7 +10,8 @@ end
 theme.name = "Devotion 1.0"
 theme.theme_dir = util.getdir("config") .. "/themes/devotion"
 
-theme.wallpaper     = res("background.jpg")
+theme.wallpapers = { res("wallpapers/wheat-field.jpg"),
+                     res("wallpapers/sunset-mood.jpg") }
 theme.icon_dir      = res("icons")
 
 theme.font          = "sans 9"

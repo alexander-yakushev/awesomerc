@@ -19,7 +19,7 @@ function log.n(data, tag)
 end
 
 function log.p(...)
-   print("Debug print", ...)
+   print("[DEBUG]", ...)
 end
 
 return log

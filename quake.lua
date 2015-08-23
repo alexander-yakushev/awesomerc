@@ -26,7 +26,7 @@
 local awful  = require("awful")
 
 -- Module "quake"
-local quake = { consoles = {} }
+local quake = { }
 
 local QuakeConsole = {}
 
@@ -35,19 +35,21 @@ function QuakeConsole:display()
    -- First, we locate the terminal
    local quake_client = nil
    local i = 0
-   for k, c in pairs(client.get(self.screen)) do
-      if c.instance == self.name then
-         i = i + 1
-         if i == 1 then
-            quake_client = c
-         else
-            -- Additional matching clients, let's remove the sticky bit
-            -- which may persist between awesome restarts. We don't close
-            -- them as they may be valuable. They will just turn into a
-            -- classic terminal.
-            c.sticky = false
-            c.ontop = false
-            c.above = false
+   for s = 1, screen.count() do
+      for k, c in pairs(client.get(s)) do
+         if c.instance == self.name then
+            i = i + 1
+            if i == 1 then
+               quake_client = c
+            else
+               -- Additional matching clients, let's remove the sticky bit
+               -- which may persist between awesome restarts. We don't close
+               -- them as they may be valuable. They will just turn into a
+               -- classic terminal.
+               c.sticky = false
+               c.ontop = false
+               c.above = false
+            end
          end
       end
    end
@@ -60,7 +62,7 @@ function QuakeConsole:display()
    end
 
    -- Compute size
-   local geom = screen[self.screen].workarea
+   local geom = screen[mouse.screen].workarea
    local width, height = self.width, self.height
    if width  <= 1 then width = geom.width * width end
    if height <= 1 then height = geom.height * height end
@@ -72,6 +74,7 @@ function QuakeConsole:display()
    elseif self.vert == "bottom" then y = geom.height + geom.y - height
    else   y = geom.y + (geom.height - height)/2 end
 
+   local changed_screen = (quake_client.screen ~= mouse.screen)
    -- Resize
    awful.client.floating.set(quake_client, true)
    quake_client.border_width = 0
@@ -91,14 +94,15 @@ function QuakeConsole:display()
 
    -- Toggle display
    if self.visible then
-      awful.client.movetotag(awful.tag.selected(self.screen), quake_client)
+      awful.client.movetotag(awful.tag.selected(mouse.screen), quake_client)
       quake_client.hidden = false
       quake_client:raise()
       client.focus = quake_client
    else -- Hide and detach tags
-      if not quake_client:isvisible() then -- Terminal is on other tag, bring it here
-         -- quake_client.hidden = true
-         awful.client.movetotag(awful.tag.selected(self.screen), quake_client)
+      if not quake_client:isvisible() or changed_screen then
+         -- Terminal is on other tag, bring it here
+         quake_client.hidden = false
+         awful.client.movetotag(awful.tag.selected(mouse.screen), quake_client)
          self.visible = true
       else
          quake_client.hidden = true
@@ -133,15 +137,14 @@ function QuakeConsole:new(config)
    local console = setmetatable(config, { __index = QuakeConsole })
    client.connect_signal("manage",
 			  function(c)
-			     if c.instance == console.name and c.screen == console.screen then
+			     if c.instance == console.name then
 				console:display()
 			     end
 			  end)
    client.connect_signal("unmanage",
 			  function(c)
-			     if c.instance == console.name and c.screen == console.screen then
+			     if c.instance == console.name then
 				console.visible = false
-                                quake.consoles[console.screen] = nil
 			     end
 			  end)
 
@@ -164,10 +167,10 @@ end
 
 function quake.toggle(args)
    args.screen = args.screen or mouse.screen
-   if not quake.consoles[args.screen] then
-      quake.consoles[args.screen] = QuakeConsole:new(args)
+   if not quake.console then
+      quake.console = QuakeConsole:new(args)
    else
-      quake.consoles[args.screen]:toggle()
+      quake.console:toggle()
    end
 end
 

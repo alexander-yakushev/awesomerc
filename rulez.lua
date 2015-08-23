@@ -1,5 +1,6 @@
 local awful = require('awful')
 awful.rules = require('awful.rules')
+local vista = require('vista')
 
 local rulez = { rules_file = awful.util.getdir("config") .. "/saved_rules.lua" }
 
@@ -58,9 +59,25 @@ function table.read(f)
 end
 
 local function existing_screen(s)
-   s = s or screen.count()
-   if s > screen.count() then return 1
-   else return s end
+   s = s or vista.primary
+   if s == "primary" then
+      return vista.primary
+   elseif s == "secondary" then
+      return vista.secondary
+   elseif s > screen.count() then
+      return 1
+   else
+      return s
+   end
+end
+
+local function screen_role(s)
+   s = s or mouse.screen
+   if s == vista.primary then
+      return "primary"
+   elseif s == vista.secondary then
+      return "secondary"
+   end
 end
 
 function rulez.apply()
@@ -68,16 +85,19 @@ function rulez.apply()
    for _, v in ipairs(rulez.static_rules) do
       table.insert(t, v)
    end
-   for _, v in ipairs(rulez.saved_rules) do
-      local scr = existing_screen(v.properties.screen)
-      local rule = v
-      local tag = v.properties.tag
+   for _, rule in ipairs(rulez.saved_rules) do
+      local scr = existing_screen(rule.properties.screen)
+      local tag = rule.properties.tag
       if tag ~= nil then
          rule.properties.tag = tags[scr][tag]
+         if rule.properties.screen ~= nil then
+            rule.properties.screen = scr
+         end
       end
       table.insert(t, rule)
    end
    awful.rules.rules = t
+   log.d(t)
 end
 
 function rulez.init(static_rules)
@@ -109,6 +129,9 @@ function rulez.persist()
          local ov = { rule = v.rule,
                       properties = { floating = v.properties.floating,
                                      tag = tag_id(v.properties.tag) } }
+         if v.properties.screen ~= nil then
+            ov.properties.screen = screen_role(v.properties.screen)
+         end
          table.insert(rules_data, ov)
       end
    end
@@ -142,15 +165,20 @@ function rulez.remember(c)
 
    local tag = c:tags()[1]
 
-   if (rule.properties.tag == nil or rule.properties.tag ~= tag) then
+   if (rule.properties.tag == nil or rule.properties.tag ~= tag
+       or rule.properties.screen == nil or rule.properties.screen ~= mouse.screen) then
       rule.properties.tag = tag
-      naughty.notify({ title = "Client: " .. class,
-                       text  = "Bound to tag " .. tag_id(tag) })
+      rule.properties.screen = mouse.screen
+      local s_role = screen_role()
+      naughty.notify({ title = "Client: " .. class, screen = mouse.screen,
+                       text  = string.format("Bound to tag %d%s",
+                                             tag_id(tag),
+                                             (s_role and " of " .. s_role .. " screen" or "")) })
    else
       rule.properties.tag = nil
       rule.properties.screen = nil
-      naughty.notify({ title = "Client: " .. class,
-                       text  = "Unbound from tag " .. tag_id(tag) })
+      naughty.notify({ title = "Client: " .. class, screen = mouse.screen,
+                       text  = string.format("Unbound from tag %d", tag_id(tag)) })
    end
    rulez.persist()
 end

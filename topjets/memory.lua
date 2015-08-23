@@ -1,36 +1,21 @@
-local utility = require('utility')
 local wibox = require('wibox')
-local iconic = require('iconic')
 local scheduler = require('scheduler')
+local base = require('topjets.base')
 
 -- Module topjets.cpu
-local memory = {}
+local memory = base()
 
 local icons = {}
-local icon_files = { "brasero-disc-00", "brasero-disc-20", "brasero-disc-40",
-                     "brasero-disc-60", "brasero-disc-80", "brasero-disc-100" }
+
+function memory.init()
+   for i, perc in ipairs({ "00", 20, 40, 60, 80, 100 }) do
+      icons[i] = base.icon("brasero-disc-" .. perc, { 24, 128}, "actions")
+   end
+   scheduler.register_recurring("memory_update", 10, memory.update)
+end
 
 function memory.new()
-   for i, f in ipairs(icon_files) do
-      icons[i] = { small = iconic.lookup_icon(f, { preferred_size = "24x24",
-                                                   icon_types = { "/actions/" }}),
-                   large = iconic.lookup_icon(f, { preferred_size = "128x128",
-                                                   icon_types = { "/actions/" }}) }
-   end
-
-   local _widget = wibox.widget.imagebox()
-   scheduler.register_recurring("memory_update", 10,
-                                function() memory.update(_widget) end)
-   utility.add_hover_tooltip(_widget,
-                             function(w)
-                                local f = string.format
-                                return { title = f("Usage:\t %d%%", w.data.usep),
-                                         text = f("Used:\t %d MB\nFree:\t %d MB\nTotal:\t %d MB",
-                                                  w.data.inuse, w.data.free, w.data.total),
-                                         icon = w.data.icon.large, icon_size = 48,
-                                         timeout = 0 }
-                             end)
-   return _widget
+   return wibox.widget.imagebox()
 end
 
 local function get_usage_icon (usage_p)
@@ -44,7 +29,7 @@ local function get_usage_icon (usage_p)
    return icons[idx]
 end
 
-function memory.update(w)
+function memory.update()
    local _mem = { buf = {} }
 
    -- Get MEM info
@@ -63,10 +48,23 @@ function memory.update(w)
    _mem.inuse = _mem.total - _mem.free
    _mem.usep  = math.floor(_mem.inuse / _mem.total * 100)
 
-   w.data = _mem
-   w.data.icon = get_usage_icon(_mem.usep)
+   memory.data = _mem
+   memory.data.icon = get_usage_icon(_mem.usep)
 
-   w:set_image(w.data.icon.small)
+   memory.refresh_all(memory.data.icon[1])
 end
 
-return setmetatable(memory, { __call = function(_, ...) return memory.new(...) end})
+function memory.refresh(w, icon)
+   w:set_image(icon)
+end
+
+function memory.tooltip()
+   local d = memory.data
+   return { title = string.format("Usage:\t %d%%", d.usep),
+            text = string.format("Used:\t %d MB\nFree:\t %d MB\nTotal:\t %d MB",
+                                 d.inuse, d.free, d.total),
+            icon = d.icon[2], icon_size = 48,
+            timeout = 0 }
+end
+
+return memory

@@ -1,6 +1,7 @@
 return
-{ { properties = { floating = true,
-      tag = 1 },
+{ { properties = { screen = "primary",
+      tag = 1,
+      floating = true },
     rule = { class = "Skype" } },
   { properties = { tag = 1 },
     rule = { class = "Viber" } },
@@ -10,11 +11,13 @@ return
     rule = { class = "Chromium" } },
   { properties = { tag = 2 },
     rule = { class = "Thunderbird" } },
-  { properties = { tag = 3 },
+  { properties = { tag = 3,
+      screen = "primary" },
     rule = { class = "Emacs" } },
   { properties = { tag = 4 },
     rule = { class = "Steam" } },
-  { properties = { tag = 6 },
+  { properties = { tag = 6,
+      screen = "primary" },
     rule = { class = "Transmission-gtk" } },
   { properties = { tag = 6 },
     rule = { class = "gimp" } },
@@ -45,4 +48,6 @@ return
   { properties = { tag = 4 },
     rule = { class = "Monitor" } },
   { properties = { tag = 4 },
-    rule = { class = "VisualVM 1.3.8" } } }
+    rule = { class = "VisualVM 1.3.8" } },
+  { properties = { tag = 4 },
+    rule = { class = "Player" } } }

@@ -1,11 +1,10 @@
 local wibox = require('wibox')
+local l = require('layout')
 local system = require('system')
-local iconic = require('iconic')
-local utility = require('utility')
+local base = require('topjets.base')
 
-local network = {}
+local network = base()
 
-local format = "%s%d ms"
 local hosts = { "github.com", "195.24.232.203", "188.130.220.1", "192.168.1.1" }
 local short_labels = { "", "!DNS: ", "L: ", "R: " }
 local labels = { "World", "W/o DNS", "Local", "Router" }
@@ -16,16 +15,58 @@ local tooltip = { title = "Network\t\tLatency\t\tLoss",
 local icon_names = { wired = "network-transmit-receive",
                      wireless = "network-wireless-signal-excellent",
                      disconnected = "network-offline" }
+local icons = {}
 
-local function connection_callback(w, type)
-   w.network_icon:set_image(icons.small[type])
-   tooltip.icon = icons.large[type]
-   if type == "none" then
+function network.init()
+   for k, v in pairs(icon_names) do
+      icons[k] = base.icon(v, { 24, 128 }, "status")
+   end
+
+   system.network.interfaces = { "eth0", "wlan0" }
+   system.network.hosts = hosts
+   system.network.add_connection_callback(network.connection_callback)
+   system.network.add_latency_callback(network.latency_callback)
+
+   system.network.init()
+end
+
+function network.new(is_v)
+   local network_icon = wibox.widget.imagebox(icons.disconnected[2])
+   local network_text = wibox.widget.textbox()
+
+   local _widget =
+      l.fixed { l.margin { l.midpoint { network_icon,
+                                        vertical = is_v },
+                           margin_left = (is_v and 4 or 0), margin_right = 4 },
+                l.midpoint { network_text,
+                             vertical = is_v },
+                vertical = is_v }
+
+   _widget.network_icon = network_icon
+   _widget.network_text = network_text
+
+   return _widget
+end
+
+function network.refresh(w, iface_type, data)
+   if iface_type ~= nil then
+      w.network_icon:set_image(icons[iface_type][2])
+      if iface_type == "none" then
+         w.network_text:set_markup("")
+      end
+   end
+   if data ~= nil then
+      for i = 1, #hosts do
+         if data[hosts[i]].loss ~= 100 then
+            w.network_text:set_markup(string.format("%s%d ms", short_labels[i], math.floor(data[hosts[i]].time)))
+            return
+         end
+      end
       w.network_text:set_markup("")
    end
 end
 
-local function update_tooltip (data)
+function network.update_tooltip(data)
    tooltip.text = ""
    for i = 1, #hosts do
       local lat = data[hosts[i]].time
@@ -44,57 +85,18 @@ local function update_tooltip (data)
    end
 end
 
-local function latency_callback(w, data)
-   update_tooltip(data)
-   for i = 1, #hosts do
-      if data[hosts[i]].loss ~= 100 then
-         w.network_text:set_markup(string.format(format, short_labels[i], math.floor(data[hosts[i]].time)))
-         return
-      end
-   end
-   w.network_text:set_markup("")
+function network.tooltip()
+   return tooltip
 end
 
-function network.new()
-   icons = { small = {}, large = {} }
-   for k, v in pairs(icon_names) do
-      icons.small[k] = iconic.lookup_status_icon(v, { preferred_size = "128x128" })
-      icons.large[k] = iconic.lookup_status_icon(v, { preferred_size = "128x128" })
-   end
-
-   local network_icon = wibox.widget.imagebox()
-   local network_text = wibox.widget.textbox()
-
-   local _widget = wibox.layout.fixed.vertical()
-   local icon_centered = wibox.layout.align.horizontal()
-   icon_centered:set_middle(wibox.layout.constraint(network_icon, 'exact', 40, 40))
-   _widget:add (icon_centered)
-   local val_centered = wibox.layout.align.horizontal()
-   val_centered:set_middle(network_text)
-   _widget:add (val_centered)
-
-   _widget.network_icon = network_icon
-   _widget.network_text = network_text
-
-   network_icon:set_image(icons.disconnected)
-   network_text:set_markup("")
-
-   system.network.interfaces = { "eth0", "wlan0" }
-   system.network.add_connection_callback(function(_, type)
-                                             connection_callback(_widget, type)
-                                          end)
-   system.network.hosts = hosts
-   system.network.add_latency_callback(function(data)
-                                          latency_callback(_widget, data)
-                                       end)
-
-   system.network.init()
-
-   utility.add_hover_tooltip(_widget,
-                             function(w)
-                                return tooltip
-                             end)
-   return _widget
+function network.connection_callback(_, iface_type)
+   tooltip.icon = icons[iface_type][2]
+   network.refresh_all(iface_type, nil)
 end
 
-return setmetatable(network, { __call = function(_, ...) return network.new(...) end})
+function network.latency_callback(data)
+   network.update_tooltip(data)
+   network.refresh_all(nil, data)
+end
+
+return network

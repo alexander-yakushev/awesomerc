@@ -1,37 +1,34 @@
 local wibox = require('wibox')
+local l = require('layout')
 local utility = require('utility')
-local iconic = require('iconic')
 local scheduler = require('scheduler')
+local base = require('topjets.base')
 
 -- Module topjets.cpu
-local cpu = {}
+local cpu = base()
 
-local cpu_usage  = {}
-local cpu_total  = {}
-local cpu_active = {}
+local icons = {}
 
-local iconic_args = { preferred_size = "24x24" }
-local icons
+function cpu.init()
+   for i, perc in ipairs({ "00", 25, 50, 75, 100 }) do
+      icons[i] = base.icon("indicator-cpufreq-" .. perc, 24, "status")
+   end
 
-function cpu.new()
-   icons = { iconic.lookup_status_icon("indicator-cpufreq-00", iconic_args),
-             iconic.lookup_status_icon("indicator-cpufreq-25", iconic_args),
-             iconic.lookup_status_icon("indicator-cpufreq-50", iconic_args),
-             iconic.lookup_status_icon("indicator-cpufreq-75", iconic_args),
-             iconic.lookup_status_icon("indicator-cpufreq-100", iconic_args) }
+   scheduler.register_recurring("cpu_update", 5, cpu.update)
+end
 
+function cpu.new(is_vertical)
    local cpu_icon = wibox.widget.imagebox()
    local cpu_text = wibox.widget.textbox()
 
-   local _widget = wibox.layout.fixed.horizontal()
-   _widget:add (wibox.layout.constraint(cpu_icon, 'exact', 24, 24))
-   _widget:add (cpu_text)
+   local _widget = l.fixed { l.margin { l.constrain { cpu_icon, size = 24},
+                                        margin_right = 4 },
+                             cpu_text }
 
    _widget.cpu_icon = cpu_icon
    _widget.cpu_text = cpu_text
+   _widget.is_vertical = is_vertical
 
-   scheduler.register_recurring("cpu_update", 5,
-                                function() cpu.update(_widget) end)
    return _widget
 end
 
@@ -46,8 +43,11 @@ local function get_usage_icon (usage_p)
    return icons[idx]
 end
 
-function cpu.update(w)
+function cpu.update()
    local cpu_lines = {}
+   local cpu_usage  = {}
+   local cpu_total  = {}
+   local cpu_active = {}
 
    -- Get CPU stats
    local f = io.open("/proc/stat")
@@ -92,10 +92,13 @@ function cpu.update(w)
    local temp = utility.slurp("/sys/class/thermal/thermal_zone0/temp", "*line")
    temp = tonumber(temp) / 1000
 
-   local line = string.format(" %d\n °C", temp)
-
-   w.cpu_text:set_markup(line)
-   w.cpu_icon:set_image(get_usage_icon(cpu_usage[1]))
+   cpu.refresh_all(temp, get_usage_icon(cpu_usage[1]))
 end
 
-return setmetatable(cpu, { __call = function(_, ...) return cpu.new(...) end})
+function cpu.refresh(w, temp, icon)
+   local line = string.format("%d%s°C", temp, w.is_vertical and "\n" or "")
+   w.cpu_text:set_markup(line)
+   w.cpu_icon:set_image(icon)
+end
+
+return cpu

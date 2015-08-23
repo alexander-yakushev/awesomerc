@@ -85,13 +85,14 @@ end
 
 local shown_pids = nil
 
-function processwatcher.register(w)
+function processwatcher.register(w, tooltip_position)
    widget = w
    processwatcher.icon = iconic.lookup_status_icon("indicator-cpufreq-00",
                                                    { preferred_size = "128x128" }),
    utility.add_hover_tooltip(
       w, function(w)
          local data = get_formatted_data()
+         data.naughty.position = tooltip_position
          shown_pids = data.pids
          return data.naughty
    end)

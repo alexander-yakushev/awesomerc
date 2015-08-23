@@ -7,11 +7,14 @@ naughty = require("naughty")
 log = require("log")
 scheduler = require('scheduler')
 private = require('private')
+vista = require('vista')
 require("awful.autofocus")
 local beautiful = require('beautiful')
+local utility = require("utility")
+
+userdir = utility.pslurp("echo $HOME", "*line")
 
 local quake = require("quake")
-local utility = require("utility")
 local currencies = require("currencies")
 local dict = require("dict")
 local minitray = require('minitray')
@@ -25,8 +28,6 @@ calc = utility.calc
 notify_at = utility.notify_at
 money = currencies.recalc
 conv = utility.conversion
-
-userdir = utility.pslurp("echo $HOME", "*line")
 
 -- Autorun programs
 autorunApps = {
@@ -44,7 +45,6 @@ runOnceApps = {
    'owncloud',
    'pulseaudio --start',
    'redshift -l 60.8:10.7 -m vidmode -t 6500:5000',
-   -- 'workrave &!',
 }
 
 utility.autorun(autorunApps, runOnceApps)
@@ -55,8 +55,23 @@ lustrous.init(private.user.loc)
 -- Themes define colours, icons, and wallpapers
 beautiful.init(awful.util.getdir("config") .. "/themes/devotion/theme.lua")
 
+-- Configure screens
+vista.setup {
+   { rule = { name = "LVDS1" },
+     properties = { secondary = true } },
+   { rule = { name = "VGA1" },
+     properties = { primary = true } },
+   { rule = { ratio = "1.25-" },
+     properties = { wallpaper = beautiful.wallpapers[2],
+                    statusbar = { position = "top", width = 58 } } },
+   { rule = {},
+     properties = { wallpaper = beautiful.wallpapers[1],
+                    statusbar = { position = "right", width = 58 } } } }
+
 -- Wallpaper
-gears.wallpaper.maximized(beautiful.wallpaper, 1, true)
+for s = 1, screen.count() do
+   gears.wallpaper.maximized(vista[s].wallpaper, s, true)
+end
 
 -- Default system software
 software = { terminal = "urxvt",
@@ -88,7 +103,7 @@ end
 
 -- Statusbar
 for s = 1, screen.count() do
-   statusbar.create(s)
+   statusbar.create(s, vista[s].statusbar)
 end
 
 -- Configure menubar
@@ -115,39 +130,6 @@ function snap(filename)
    end }
 end
 
---- Smart Move a client to a screen. Default is next screen, cycling.
--- @param c The client to move.
--- @param s The screen number, default to current + 1.
-function smart_movetoscreen(c, s)
-   local was_maximized = { h = false, v = false }
-   if c.maximized_horizontal then
-      c.maximized_horizontal = false
-      was_maximized.h = true
-   end
-   if c.maximized_vertical then
-      c.maximized_vertical = false
-      was_maximized.v = true
-   end
-
-   local sel = c or client.focus
-   if sel then
-      local sc = screen.count()
-      if not s then
-         s = sel.screen + 1
-      end
-      if s > sc then s = 1 elseif s < 1 then s = sc end
-      sel.screen = s
-      mouse.coords(screen[s].geometry)
-   end
-
-   if was_maximized.h then
-      c.maximized_horizontal = true
-   end
-   if was_maximized.v then
-      c.maximized_vertical = true
-   end
-end
-
 -- Key bindings
 globalkeys = utility.keymap(
    -- Tag/client navigation
@@ -160,6 +142,8 @@ globalkeys = utility.keymap(
    "M-k", function() awful.client.focus.byidx(-1) utility.refocus() end,
    "M-d", function() utility.view_first_empty() end,
    "M-u", awful.client.urgent.jumpto,
+   "M-u", awful.client.urgent.jumpto,
+   "M-i", function() vista.jump_cursor() end,
    "M-Tab", function() awful.client.focus.history.previous() utility.refocus() end,
    "M-C-n", awful.client.restore,
    -- Application launching
@@ -176,7 +160,7 @@ globalkeys = utility.keymap(
                      ontop = true })
                end,
    "M-r", function ()
-      local promptbox = statusbar.widgets.prompt[mouse.screen]
+      local promptbox = statusbar[mouse.screen].widgets.prompt
       awful.prompt.run({ prompt = promptbox.prompt },
          promptbox.widget,
          function (...)
@@ -190,7 +174,7 @@ globalkeys = utility.keymap(
           end,
    "M-x", function ()
       awful.prompt.run({ prompt = "Run Lua code: " },
-         statusbar.widgets.prompt[mouse.screen].widget,
+         statusbar[mouse.screen].widgets.prompt.widget,
          awful.util.eval, nil,
          awful.util.getdir("cache") .. "/history_eval")
           end,
@@ -198,8 +182,8 @@ globalkeys = utility.keymap(
    "XF86ScreenSaver", function() os.execute(userdir .. "/scripts/screenlock") end,
    "XF86MonBrightnessDown", function() os.execute("xbacklight -10") end,
    "XF86MonBrightnessUp", function() os.execute("xbacklight +10") end,
-   "XF86AudioLowerVolume", function() statusbar.widgets.vol:dec() end,
-   "XF86AudioRaiseVolume", function() statusbar.widgets.vol:inc() end,
+   "XF86AudioLowerVolume", function() statusbar[mouse.screen].widgets.vol:dec() end,
+   "XF86AudioRaiseVolume", function() statusbar[mouse.screen].widgets.vol:inc() end,
    "M-l", minitray.toggle,
    "M-space", function()
       awful.layout.inc(layouts, 1)
@@ -207,7 +191,7 @@ globalkeys = utility.keymap(
                        text = "Current layout: " .. awful.layout.get(mouse.screen).name }
               end,
    "M-b", function()
-      statusbar.wiboxes[mouse.screen].visible = not statusbar.wiboxes[mouse.screen].visible
+      statusbar[mouse.screen].wibox.visible = not statusbar[mouse.screen].wibox.visible
           end
 )
 
@@ -215,7 +199,7 @@ clientkeys = utility.keymap(
    "M-f", function (c) c.fullscreen = not c.fullscreen end,
    "M-S-c", function (c) c:kill() end,
    "M-C-space", awful.client.floating.toggle,
-   "M-o", smart_movetoscreen,
+   "M-o", vista.movetoscreen,
    "M-q", rulez.remember,
    "M-t", function (c) c.ontop = not c.ontop end,
    "M-n", function (c) c.minimized = true end,
@@ -260,7 +244,7 @@ clientbuttons = utility.keymap(
    "M-LMB", awful.mouse.client.move,
    "M-RMB", awful.mouse.client.resize)
 
-statusbar.widgets.mpd:append_global_keys()
+statusbar[1].widgets.mpd:append_global_keys()
 root.keys(globalkeys)
 
 -- Rules

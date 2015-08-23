@@ -1,23 +1,46 @@
 local menu = require('awful.menu')
+local util = require('awful.util')
 
 local smartmenu = {}
 
-local fm_script = "sudo /home/unlogic/scripts/flashmanager"
+local fm_script = userdir .. "/scripts/flashmanager"
+local np_script = userdir .. "/scripts/netpower"
+
+local fm_script_fmt = "sudo %s/scripts/flashmanager %s"
 
 local function flashmanager()
-   local f = io.popen(fm_script)
-   local actions = { theme = { width = 300 } }
-   local i = 1
-   for l in f:lines() do
-      table.insert(actions, { string.format("[&%i] %s", i, l),
-                              fm_script .. " " .. i })
-      i = i + 1
+   if not util.file_readable(fm_script) then
+      return
    end
-   return actions
+   local f = io.popen("sudo " .. fm_script)
+   if (f ~= nil) then
+      local actions = { theme = { width = 300 } }
+      local i = 1
+      for l in f:lines() do
+         table.insert(actions, { string.format("[&%i] %s", i, l),
+                                 fm_script .. " " .. i})
+         i = i + 1
+      end
+      return actions
+   end
 end
 
 local function netpower(action)
-   return "sudo /home/unlogic/scripts/netpower " .. action
+   return string.format("sudo %s %s", np_script, action)
+end
+
+local function xrandr_menu()
+   local xrandr = function(args)
+      return function()
+         util.spawn("xrandr " .. args)
+      end
+   end
+   return {
+      { "&LVDS1", xrandr("--output LVDS1 --auto --output VGA1 --off") },
+      { "&VGA1", xrandr("--output LVDS1 --off --output VGA1 --auto") },
+      { "LV&DS1+VGA1", {
+           { "&Right of", xrandr("--output VGA1 --auto --right-of LVDS1 --auto") },
+           { "&Below", xrandr("--output VGA1 --auto --below LVDS1 --auto") } } } }
 end
 
 function smartmenu.show()
@@ -28,8 +51,9 @@ function smartmenu.show()
                          { '&network', { { "&Both", netpower("on on") },
                                          { "&Ethernet", netpower("on off") },
                                          { "&Wireless", netpower("off on") },
-                                         { "&Neither", netpower("off off") } } } },
-                         theme = { width = 150 } }
+                                         { "&Neither", netpower("off off") } } },
+                         { '&display', xrandr_menu() } },
+                      theme = { width = 150 } }
    local m = menu(mainmenu)
    m:show()
 end

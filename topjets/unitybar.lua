@@ -1,4 +1,5 @@
 local wibox = require('wibox')
+local l = require('layout')
 local awful = require('awful')
 local iconic = require('iconic')
 local utility = require('utility')
@@ -49,66 +50,54 @@ function update_tag(tag, wdg)
    end
 
    if #visible_clients == 0 then
-      local alignedv = wibox.layout.align.vertical()
-      local aligned = wibox.layout.align.horizontal()
-      middle:set_middle(alignedv)
-      alignedv:set_middle(aligned)
       local num = wibox.widget.textbox(string.format('<span color="%s">%s</span>',
                                                      unitybar.args.fg_normal, tag.name))
       middle:buttons(utility.keymap(
                         "LMB", function() awful.tag.viewonly(tag) end))
-      aligned:set_middle(num)
+      middle:set_middle( l.center { num, horizontal = true, vertical = true } )
       return
    end
 
    if pivot ~= 0 then
-      local content = wibox.layout.fixed.horizontal()
+      local back = l.fixed { vertical = true }
+      local content =
+         l.fixed { l.center { l.exact { visible_clients[pivot], size = 35 },
+                              vertical = true },
+                   l.center { back, vertical = true }}
       middle:set_middle(content)
-      local alignedf = wibox.layout.align.vertical()
-      local front = constrain(visible_clients[pivot], 35)
-      alignedf:set_middle(front)
-      local aligned = wibox.layout.align.vertical()
-      local back = wibox.layout.fixed.vertical()
-      content:add(alignedf)
-      aligned:set_middle(back)
-      content:add(aligned)
 
       local max = 3
 
       for i = pivot - 1, 1, -1 do
          if max ~=0 then
-            back:add(constrain(visible_clients[i], 17))
+            back:add(l.exact { visible_clients[i], size = 17 })
             max = max - 1
          end
       end
       for i = #visible_clients, pivot + 1, -1 do
          if max ~=0 then
-            back:add(constrain(visible_clients[i], 19))
+            back:add(l.exact { visible_clients[i], size = 19 })
             max = max - 1
          end
       end
    else
-      local alignedv = wibox.layout.align.vertical()
-      local aligned = wibox.layout.align.horizontal()
-      middle:set_middle(alignedv)
-      local rowstack = wibox.layout.fixed.vertical()
-      local first_row = wibox.layout.fixed.horizontal()
-      alignedv:set_middle(aligned)
-      aligned:set_middle(rowstack)
-      rowstack:add(first_row)
+      local first_row = l.fixed {}
+      local rowstack = l.fixed { first_row, vertical = true }
+      middle:set_middle(l.center { rowstack, horizontal = true, vertical = true })
+
       if #visible_clients <= 3 then
          for i = 1, #visible_clients do
-            first_row:add(constrain(visible_clients[i], 19))
+            first_row:add( l.exact { visible_clients[i], size = 19 } )
          end
       else
-         local second_row = wibox.layout.fixed.horizontal()
+         local second_row = l.fixed {}
          rowstack:add(second_row)
          local num_cli = ((#visible_clients > 6) and 6 or #visible_clients)
          for i = 1, math.ceil(num_cli / 2) do
-            first_row:add(constrain(visible_clients[i], 19))
+            first_row:add( l.exact { visible_clients[i], size = 19 } )
          end
          for i = math.ceil(num_cli / 2) + 1, num_cli do
-            second_row:add(constrain(visible_clients[i], 19))
+            second_row:add( l.exact { visible_clients[i], size = 19 } )
          end
       end
    end
@@ -141,9 +130,10 @@ function unitybar.new(args)
 
    unitybar.tag_widgets[s] = {}
 
-   local bar = wibox.layout.fixed.vertical()
+   local bar = l.fixed { vertical = not args.horizontal }
+
    for _, tag in ipairs(tags) do
-      local tag_widget = constrain(nil, args.width)
+      local tag_widget = l.exact { size = args.width }
       local u = function() update_tag(tag, tag_widget) end
       for _, signal in ipairs(tag_signals) do
          awful.tag.attached_connect_signal(s, signal, u)
@@ -153,7 +143,7 @@ function unitybar.new(args)
       end
       u()
       table.insert(unitybar.tag_widgets[s], tag_widget)
-      bar:add(constrain(tag_widget, args.width))
+      bar:add(l.exact { tag_widget, size = args.width })
    end
    return bar
 end

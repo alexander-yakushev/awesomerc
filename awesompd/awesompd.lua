@@ -835,6 +835,7 @@ function awesompd:show_notification(hint_title, hint_text, hint_image)
 					, text       = awesompd.protect_string(hint_text)
 					, timeout    = 5
 					, position   = "top_right"
+                                        , screen = mouse.screen
                                         , icon       = hint_image
                                         , icon_size  = self.album_cover_size
                                      })

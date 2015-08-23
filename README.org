@@ -24,3 +24,8 @@
   - Quake-inspired dropdown terminal on =Modkey-Return=
   - Dynamic rules, bind programs to tags with =Modkey-Q=
   - For other useful stuff see =x220.lua= and modules it loads.
+
+* Usage
+
+  You can just replace your =.config/awesome= folder with this repo and hope it
+  works. You should also have Awoken icon theme installed.

@@ -4,23 +4,23 @@ local iconic = require('iconic')
 local scheduler = require('scheduler')
 local asyncshell = require('asyncshell')
 local awful = require('awful')
+local base = require('topjets.base')
 
 -- Module topjets.battery
-local battery = { warning_threshold = 10,
-                  devices = { } }
+local battery = base { warning_threshold = 10,
+                       devices = {}, data = {} }
 
-local function l_icon(icon_name)
-   return { small = iconic.lookup_status_icon(icon_name, { preferred_size = '24x24' }),
-            large = iconic.lookup_status_icon(icon_name, { preferred_size = '128x128' }) }
-end
 local icons
 
-function battery.new(devices)
+function battery.init(devices)
    if (devices == nil) or (#devices == 0) then
       error("topjets.battery.new: need at least one device")
    end
    battery.devices = devices
 
+   local l_icon = function (icon_name)
+      return base.icon(icon_name, { 24, 128}, "status")
+   end
    icons = { charging = { l_icon('gpm-battery-000-charging'),
                           l_icon('gpm-battery-020-charging'),
                           l_icon('gpm-battery-040-charging'),
@@ -36,67 +36,37 @@ function battery.new(devices)
              full = l_icon('gpm-battery-100'),
              missing = l_icon('gpm-battery-empty') }
 
-   local _widget = wibox.widget.imagebox()
-   _widget.data = {}
-
    for i, dev in ipairs(battery.devices) do
-      _widget.data[i] = { off = true }
+      battery.data[i] = { off = true }
       scheduler.register_recurring("topjets.battery" .. i, dev.interval,
-                                   function () dev.update_fn(_widget, i) end)
+                                   function () dev.update_fn(i) end)
    end
-
-   utility.add_hover_tooltip(_widget,
-                             function(w)
-                                local function form_dev_str(i)
-                                   local dev = battery.devices[i]
-                                   local d = w.data[i]
-                                   local onbattery = "\t"
-                                   if d.time_disc ~= nil then
-                                      onbattery = os.date("!%X",os.time() - d.time_disc)
-                                   end
-                                   if not d.off then
-                                      return string.format("%s\t%s%%\t\t%s\t%s",
-                                                           dev.name, d.charge,
-                                                           onbattery .. "\t",
-                                                           d.status_text or d.status)
-                                   end
-                                end
-                                local text = form_dev_str(1)
-                                for i = 2, #battery.devices do
-                                   local s = form_dev_str(i)
-                                   if s ~= nil then
-                                      text = text .. "\n" .. s
-                                   end
-                                end
-                                return { title = "Device\t\tCharge\tOn battery\tStatus", text = text,
-                                         icon = w.data.icon.large, icon_size = 48,
-                                         timout = 0 }
-                             end)
-
-   _widget.add_device = function(w, dev) table.insert(battery.devices, dev) end
-   return _widget
 end
 
-function battery.update(w, dev_num, stats)
+function battery.new()
+   return wibox.widget.imagebox()
+end
+
+function battery.update(dev_num, stats)
    local dev = battery.devices[dev_num]
    if stats == nil then
-      w.data[dev_num] = { off = true }
+      battery.data[dev_num] = { off = true }
       return
    end
-   stats.disable_warning = w.data[dev_num].disable_warning
+   stats.disable_warning = battery.data[dev_num].disable_warning
 
    if stats.status:match("Discharging") then
       if stats.charge <= battery.warning_threshold and (not stats.disable_warning) then
-	 naughty.notify({ title    = "Battery Warning",
-			  text     = dev.name .. " battery is low, " .. stats.charge .."%" .. " left.",
-			  timeout  = 0, position = "top_right",
-                          icon = icons.discharging[1].large, icon_size = 32,
+         naughty.notify({ title    = "Battery Warning",
+                          text     = dev.name .. " battery is low, " .. stats.charge .."%" .. " left.",
+                          timeout  = 0, position = "top_right",
+                          icon = icons.discharging[1][2], icon_size = 32,
                           run = function(n)
-                             w.data[dev_num].disable_warning = true
+                             battery.data[dev_num].disable_warning = true
                              naughty.destroy(n)
                           end})
       end
-      if (w.data[dev_num] ~= nil) and (w.data[dev_num].time_disc == nil) then
+      if (battery.data[dev_num] ~= nil) and (battery.data[dev_num].time_disc == nil) then
          stats.time_disc = os.time()
       else
          stats.time_disc = w.data[dev_num].time_disc
@@ -107,18 +77,49 @@ function battery.update(w, dev_num, stats)
       stats.disable_warning = false
    end
    if dev.primary then
-      w:set_image(stats.icon.small)
-      w.data.icon = stats.icon
+      battery.data.icon = stats.icon
+      battery.refresh_all(stats.icon[1])
    end
-   w.data[dev_num] = stats
+   battery.data[dev_num] = stats
 end
 
-function battery.get_local(w, dev_num)
+function battery.refresh(w, icon)
+   w:set_image(icon)
+end
+
+function battery.tooltip()
+   local function form_dev_str(i)
+      local dev = battery.devices[i]
+      local d = battery.data[i]
+      local onbattery = "\t"
+      if d.time_disc ~= nil then
+         onbattery = os.date("!%X",os.time() - d.time_disc)
+      end
+      if not d.off then
+         return string.format("%s\t%s%%\t\t%s\t%s",
+                              dev.name, d.charge,
+                              onbattery .. "\t",
+                              d.status_text or d.status)
+      end
+   end
+   local text = form_dev_str(1)
+   for i = 2, #battery.devices do
+      local s = form_dev_str(i)
+      if s ~= nil then
+         text = text .. "\n" .. s
+      end
+   end
+   return { title = "Device\t\tCharge\tOn battery\tStatus", text = text,
+            icon = battery.data.icon[2], icon_size = 48,
+            timout = 0 }
+end
+
+function battery.get_local(dev_num)
    local dev = battery.devices[dev_num]
    local info = utility.pslurp("acpi", "*line")
    if not info or string.len(info) == 0 then
-      battery.update(w, dev_num, { status = "Missing", charge = 0,
-                                   icon = icons.missing })
+      battery.update(dev_num, { status = "Missing", charge = 0,
+                                icon = icons.missing })
       return
    end
 
@@ -136,7 +137,7 @@ function battery.get_local(w, dev_num)
       icon = icons.full
    end
 
-   battery.update(w, dev_num,
+   battery.update(dev_num,
                   { status = status, charge = charge, time = time,
                     icon = icon, status_text = time or status })
 end
@@ -157,7 +158,7 @@ function battery.get_adb_devices()
    return devs
 end
 
-function battery.get_via_adb(w, dev_num)
+function battery.get_via_adb(dev_num)
    local dev = battery.devices[dev_num]
    local dir = dev.dir or "/sys/class/power_supply/battery"
    local cmd, was_connected = "", true
@@ -175,12 +176,12 @@ function battery.get_via_adb(w, dev_num)
                             res = { charge = tonumber(charge),
                                     status = status }
                          end
-                         battery.update(w, dev_num, res)
+                         battery.update(dev_num, res)
                          if not was_connected then
                             awful.util.spawn("adb disconnect", false)
                          end
                          f:close()
-                           end)
+   end)
 end
 
-return setmetatable(battery, { __call = function(_, ...) return battery.new(...) end})
+return battery
