@@ -10,7 +10,7 @@ local calendar = require('calendar')
 local smartmenu = require('smartmenu')
 local keymap = utility.keymap
 
-local statusbar = { bars = {}, position = "right", width = 58 }
+local statusbar = { bars = {} }
 
 local function map(f, coll)
    for i, v in ipairs(coll) do coll[i] = f(v) end
@@ -22,24 +22,26 @@ local function terminal_with(command)
 end
 
 function statusbar.create(s, options)
-   options = options or statusbar
+   options = options or { position = "right", width = 58 }
    local is_v = (options.position == "left") or (options.position == "right")
-
-   local tt_pos = (options.position == "left" and "bottom_left") or
+   options.is_vertical = is_v
+   options.tooltip_position = (options.position == "left" and "bottom_left") or
       (options.position == "top" and "top_right") or "bottom_right"
-   topjets.set_tooltip_position(tt_pos)
+   topjets.set_tooltip_position(options.tooltip_position)
 
    local bar = {}
    bar.wibox = awful.wibox { position = options.position, screen = s,
                              width = is_v and options.width or nil,
                              height = not is_v and options.width or nil}
-   statusbar.initialize(bar, s, is_v, tt_pos)
+   statusbar.initialize(bar, s, options)
    local w = bar.widgets
 
    local add_margin = function (_w) return l.margin { _w, margin = 5 } end
 
    local layout = l.align {
-      start = l.fixed { l.midpoint { l.margin { w.menu_icon, margin = 13 },
+      start = l.fixed { l.midpoint { l.margin { l.exact { w.menu_icon,
+                                                          size = 32 },
+                                                margin = (options.width - 32) / 2 },
                                      vertical = is_v },
                         w.prompt,
                         vertical = is_v },
@@ -71,7 +73,8 @@ function statusbar.create(s, options)
    return bar.wibox
 end
 
-function statusbar.initialize(bar, s, is_vertical, tooltip_position)
+function statusbar.initialize(bar, s, options)
+   local is_vertical = options.is_vertical
    local widgets = {}
 
    -- Menu
@@ -81,7 +84,7 @@ function statusbar.initialize(bar, s, is_vertical, tooltip_position)
    widgets.menu_icon:buttons(keymap("LMB", smartmenu.show))
 
    -- Clock
-   widgets.time = topjets.clock(statusbar.width - 8)
+   widgets.time = topjets.clock(options.width)
    calendar.register(widgets.time)
    widgets.time:buttons(
       keymap("LMB", function() awful.util.spawn(software.browser_cmd ..
@@ -92,7 +95,7 @@ function statusbar.initialize(bar, s, is_vertical, tooltip_position)
 
    -- CPU widget
    widgets.cpu = topjets.cpu(is_vertical)
-   topjets.processwatcher.register(widgets.cpu, tooltip_position)
+   topjets.processwatcher.register(widgets.cpu, options.tooltip_position)
    widgets.cpu:buttons(keymap("LMB", terminal_with("htop"),
                               "RMB", topjets.processwatcher.toggle_kill_menu,
                               "WHEELUP", function() topjets.processwatcher.switch_sorter(-1) end,
@@ -167,11 +170,11 @@ function statusbar.initialize(bar, s, is_vertical, tooltip_position)
    end
 
    widgets.unitybar = topjets.unitybar { screen = s,
-                                         width = statusbar.width,
+                                         width = options.width,
                                          horizontal = not is_vertical,
+                                         thin = options.unitybar_thin_mode,
                                          fg_normal = "#888888",
-                                         bg_urgent = "#ff000088",
-                                         img_focused = beautiful.taglist_bg_focus }
+                                         bg_urgent = "#ff000088" }
 
    widgets.prompt = awful.widget.prompt()
 

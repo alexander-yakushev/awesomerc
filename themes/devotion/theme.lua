@@ -49,8 +49,6 @@ theme.fg_urgent       = "#ffffff"
 theme.fg_minimize     = "#ffffff"
 theme.fg_onscreen     = "#7f7f7f"
 
-theme.taglist_bg_focus = res("taglist/bg_focus.png")
-
 -- Configure naughty
 if naughty then
    local presets = naughty.config.presets

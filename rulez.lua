@@ -97,7 +97,6 @@ function rulez.apply()
       table.insert(t, rule)
    end
    awful.rules.rules = t
-   log.d(t)
 end
 
 function rulez.init(static_rules)

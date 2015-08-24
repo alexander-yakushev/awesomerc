@@ -69,7 +69,7 @@ function battery.update(dev_num, stats)
       if (battery.data[dev_num] ~= nil) and (battery.data[dev_num].time_disc == nil) then
          stats.time_disc = os.time()
       else
-         stats.time_disc = w.data[dev_num].time_disc
+         stats.time_disc = battery.data[dev_num].time_disc
       end
    elseif not stats.status:match("Charging") then
       stats.time_disc = nil
