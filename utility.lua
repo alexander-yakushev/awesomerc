@@ -1,9 +1,8 @@
--- Useful reusable functions
-
 local awful = require('awful')
+local beautiful = require('beautiful')
 local naughty = require('naughty')
 
--- Module "utility"
+-- Useful reusable functions
 local utility = {}
 
 function utility.slurp(file, mode)
@@ -82,6 +81,11 @@ function utility.calc(result)
    naughty.notify( { title = "Awesome calc",
                      text = "Result: " .. result,
                      timeout = 5})
+end
+
+function utility.load_theme(theme_name)
+   return beautiful.init(string.format("%s/themes/%s/theme.lua",
+                                       awful.util.getdir("config"), theme_name))
 end
 
 function utility.view_non_empty(step, s)

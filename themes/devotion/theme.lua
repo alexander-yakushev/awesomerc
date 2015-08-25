@@ -1,13 +1,13 @@
 -- Serenity awesome theme
 local util = require('awful.util')
 
-theme = {}
+local theme = {}
 
 local function res(res_name)
    return theme.theme_dir .. "/" .. res_name
 end
 
-theme.name = "Devotion 1.0"
+theme.name = "Devotion 2.0"
 theme.theme_dir = util.getdir("config") .. "/themes/devotion"
 
 theme.wallpapers = { res("wallpapers/wheat-field.jpg"),

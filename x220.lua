@@ -30,12 +30,12 @@ money = currencies.recalc
 conv = utility.conversion
 
 -- Autorun programs
-autorunApps = {
+local autorunApps = {
    "setxkbmap -layout 'us,ua,ru' -variant ',winkeys,winkeys' -option grp:menu_toggle -option compose:ralt -option terminate:ctrl_alt_bksp",
    'sleep 2; xmodmap ~/.xmodmap'
 }
 
-runOnceApps = {
+local runOnceApps = {
    'hexchat',
    'mpd',
    'xrdb -merge ~/.Xresources',
@@ -49,11 +49,9 @@ runOnceApps = {
 
 utility.autorun(autorunApps, runOnceApps)
 
--- Various initialization
+-- Theme initialization
 lustrous.init(private.user.loc)
-
--- Themes define colours, icons, and wallpapers
-beautiful.init(awful.util.getdir("config") .. "/themes/devotion/theme.lua")
+utility.load_theme("devotion")
 
 -- Configure screens
 vista.setup {

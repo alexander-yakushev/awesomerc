@@ -43,11 +43,11 @@ function unitybar.update_tag(bar, tag, wdg)
 
    local unfocused_size, focused_size
    if bar.thin then
-      unfocused_size = math.floor((bar.width - 4) / 2) - 1
-      focused_size = bar.width - 4
+      unfocused_size = math.floor((bar.width - 4) / 2)
+      focused_size = bar.width - 4 -1
    else
-      unfocused_size = math.max(math.floor((bar.width - 4) / 3) - 1, 15)
-      focused_size = bar.width - 4 - unfocused_size -1
+      unfocused_size = math.max(math.floor((bar.width - 5) / 3), 18)
+      focused_size = bar.width - 4 - unfocused_size - 1
    end
 
    if #visible_clients == 0 then
