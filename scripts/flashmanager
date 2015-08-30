@@ -1,0 +1,80 @@
+#!/usr/bin/lua
+
+local root = "/home/unlogic/.media/"
+local symlink = "/home/unlogic/flash"
+
+function get_mounted_devices()
+   f = io.popen('findmnt -l | grep -v /dev/sda | grep /dev/sd')
+   local devices = {}
+   for l in f:lines() do
+      table.insert(devices, l:match("/dev/(sd[^%s]+)"))
+   end
+   f:close()
+   return devices
+end
+
+function is_mounted(dev, mounted)
+   for _, md in ipairs(mounted) do
+      if md == dev then
+         return true
+      end
+   end
+   return false
+end
+
+function get_devices()
+   local mounted = get_mounted_devices()
+   f = io.popen('blkid | grep -v /dev/sda | grep -v /dev/loop')
+   local devices = {}
+   for l in f:lines() do
+      local dev = {}
+      l:gsub('([A-Z]+)="([^"]+)"', function (k, v)
+                dev[k:lower()] = v
+                                   end)
+      dev.name = l:match("^/dev/(sd[^:]+):")
+      dev.mounted = is_mounted(dev.name, mounted)
+      local f2 = io.popen(string.format("cat /sys/block/%s/size",
+                                        dev.name:match("([a-z]+)")))
+      dev.size = tonumber(f2:read()) / 2048 / 1024
+      table.insert(devices, dev)
+      f2:close()
+   end
+   f:close()
+   return devices
+end
+
+devices = get_devices()
+
+function print_table()
+   for i, dev in ipairs(devices) do
+      print(string.format("%s: %s (%.1f GB, %s, %s)",
+                          (dev.mounted and "Unmount" or "Mount"),
+                          dev.name, dev.size, dev.type, dev.uuid))
+   end
+end
+
+function mount(dev)
+   local mntdir = root .. dev.uuid
+   os.execute("mkdir -p '" .. mntdir .. "'")
+   os.execute("mount -o umask=0,uid=unlogic /dev/" .. dev.name .. " " .. mntdir)
+   os.execute("rm -f " .. symlink)
+   os.execute("ln -s " .. mntdir .. " " .. symlink)
+end
+
+function umount(dev)
+   local mntdir = root .. dev.uuid
+   os.execute("umount " .. mntdir)
+   os.execute("rm -rf " .. mntdir)
+   os.execute("rm -f " .. symlink)
+end
+
+if arg[1] then
+   s = tonumber(arg[1])
+   if devices[s].mounted then
+      umount(devices[s])
+   else
+      mount(devices[s])
+   end
+else
+   print_table()
+end

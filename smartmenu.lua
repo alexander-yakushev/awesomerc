@@ -2,9 +2,10 @@ local menu = require('awful.menu')
 local util = require('awful.util')
 
 local smartmenu = {}
+local scripts_dir = util.getdir("config") .. "/scripts/"
 
-local fm_script = userdir .. "/scripts/flashmanager"
-local np_script = userdir .. "/scripts/netpower"
+local fm_script = scripts_dir .. "flashmanager"
+local np_script = scripts_dir .. "netpower"
 
 local fm_script_fmt = "sudo %s/scripts/flashmanager %s"
 
