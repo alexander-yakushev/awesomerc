@@ -17,7 +17,7 @@ local complete = {}
 local interface_connected = {}
 local last_iface_connected = nil
 
-local ifconfig_command = "ifconfig %s 2> /dev/null"
+local iproute_command = "ip addr show %s 2> /dev/null"
 local ping_command = "ping -c %d -w %d -q %s"
 
 function system.network.add_latency_callback (fn)
@@ -73,10 +73,10 @@ end
 local function get_iface_type (iface)
    if not iface then
       return "none"
-   elseif iface:match("eth.+") then
-      return "wired"
-   elseif iface:match("wlan.+") then
+   elseif iface:match("wl.+") then
       return "wireless"
+   else
+      return "wired"
    end
 end
 
@@ -112,17 +112,13 @@ local function check_connected ()
 
    if last_iface_connected ~= connected_iface then
       reping_network()
+      last_iface_connected = connected_iface
    end
 end
 
-local function ifconfig_callback (f, iface)
+local function iproute_callback (f, iface)
    local t = f:read("*all")
-   local type = get_iface_type(iface)
-   if t:match("inet %d+%.%d+%.%d+%.%d+ ") then
-      interface_connected[iface] = true
-   else
-      interface_connected[iface] = false
-   end
+   interface_connected[iface] = t:match("inet %d+%.%d+%.%d+%.%d+") and true or false
    check_connected()
 end
 
@@ -130,8 +126,8 @@ local function requery_network()
    interface_connected = {}
 
    for _, iface in ipairs(system.network.interfaces) do
-      asyncshell.request(string.format(ifconfig_command, iface),
-                         function(f) ifconfig_callback(f, iface) end)
+      asyncshell.request(string.format(iproute_command, iface),
+                         function(f) iproute_callback(f, iface) end)
    end
 end
 

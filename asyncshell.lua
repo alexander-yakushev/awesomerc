@@ -48,6 +48,7 @@ function asyncshell.deliver(id)
       asyncshell.request_table[id].callback then
       local output = io.open(asyncshell.file_template .. id, 'r')
       asyncshell.request_table[id].callback(output)
+      pcall(function() output:close() end)
    end
 end
 

@@ -57,7 +57,7 @@ function vista.setup(rules)
             end
             p.primary = nil
             p.secondary = nil
-            merge(rules[i].properties, vista.properties[s])
+            merge(p, vista.properties[s])
          end
       end
    end

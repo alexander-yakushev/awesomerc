@@ -1,72 +1,75 @@
 local util = require('awful.util')
-local utility = require('utility')
 
--- Module rcloader
-local rcloader = { default_rc_folder = util.getdir("config"),
-                   system_default_rc = "/etc/xdg/awesome/rc.lua",
-                   rc_name_map = { },
-                   all_rcs = {} }
-rcloader.rc_name_map.default = rcloader.system_default_rc
+-- Module for individually configuring Awesome for different machines.
+herder = { current = {} }
+setmetatable(herder, { __index = function (_, _) return herder.current end })
+local rc_folder = util.getdir("config")
 
-local cache_file = util.getdir("cache") .. "/current_rc_name"
-
-local function n_info(text)
-   print("INFO: rcloader: " .. text)
-end
-
-local function n_error(text)
-   print("ERROR: rcloader: " .. text)
-end
-
-local function read_current_rc_name()
-   return utility.slurp(cache_file, "*line")
-end
-
-function rcloader.load(name)
-   if rcloader.rc_name_map[name] then
-      n_info("Loading " .. name)
-      dofile(rcloader.rc_name_map[name])
-   else
-      n_error("Cannot find rc file: " .. name)
-      dofile(rcloader.all_rcs[1])
+local function merge(src, dst)
+   for k, v in pairs(src) do
+      dst[k] = v
    end
 end
 
-function rcloader.load_current_rc()
-   if #rcloader.all_rcs == 0 then
-      n_error("No user rc files were specified")
-      dofile(rcloader.system_default_rc)
-   else
-      local name = read_current_rc_name()
-      if name then
-         rcloader.load(name)
-      else
-         n_error("Wrong current rc filename")
-         dofile(rcloader.all_rcs[1])
+local function hostname()
+   local f = io.popen("hostname")
+   local res = f:read()
+   f:close()
+   return res
+end
+
+local function matches(rule)
+   for k, v in pairs(rule) do
+      if k == "hostname" then
+         if v ~= hostname() then
+            return false
+         end
+      end
+      if k == "env_flag" then
+         if v ~= os.getenv("AWESOME_HERDER_FLAG") then
+            return false
+         end
+      end
+   end
+   return true
+end
+
+function herder.setup(rules)
+   for i = #rules, 1, -1 do
+      if matches(rules[i].rule) then
+         merge(rules[i].properties, herder.current)
       end
    end
 end
 
-function rcloader.set(name)
-   if not rcloader.rc_name_map[name] then
-      n_error("Cannot find rc file: " .. name)
-      return
+function herder.start()
+   if herder.current.configs then
+      for _, conf_name in ipairs(herder.current.configs) do
+         local conf_file = conf_name
+         if string.sub(conf_file, 1, 1) ~= "/" then
+            conf_file = rc_folder .. "/" .. conf_file
+         end
+         local len = string.len(conf_file)
+         if string.sub(conf_file, len - 3, len) ~= ".lua" then
+            conf_file = conf_file .. ".lua"
+         end
+         print("herder: loading config " .. conf_file)
+         dofile(conf_file)
+      end
    end
-   local f = io.open(cache_file, 'w')
-   f:write(name)
-   f:close()
-   awesome.restart()
 end
 
-function rcloader.add_rc(name, filename)
-   local fname = filename
-   if string.sub(fname, 1, 1) ~= "/" then
-      fname = rcloader.default_rc_folder .. "/" .. fname
-   end
-   rcloader.rc_name_map[name] = fname
-   table.insert(rcloader.all_rcs, fname)
-end
+-- End of herder module
 
-rcloader.add_rc("core", "x220.lua")
-rcloader.load_current_rc()
---rcloader.load("default")
+herder.setup {
+   { rule = { hostname = "heather" },
+     properties = { configs = { "x220" },
+                    hosts = { local_ip = "10.140.28.1",
+                              router_ip = "192.168.1.1" } } },
+   { rule = { env_flag = "dbg" },
+     properties = { debugging = true } },
+   { rule = { },
+     properties = { configs = { "/etc/xdg/awesome/rc.lua" } } }
+}
+
+herder.start()

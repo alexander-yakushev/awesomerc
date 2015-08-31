@@ -5,7 +5,8 @@ local base = require('topjets.base')
 
 local network = base()
 
-local hosts = { "github.com", "195.24.232.203", "188.130.220.1", "192.168.1.1" }
+local hosts = { "github.com", "195.24.232.203",
+                herder[1].hosts.local_ip, herder[1].hosts.router_ip }
 local short_labels = { "", "!DNS: ", "L: ", "R: " }
 local labels = { "World", "W/o DNS", "Local", "Router" }
 local tooltip = { title = "Network\t\tLatency\t\tLoss",

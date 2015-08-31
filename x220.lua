@@ -25,7 +25,6 @@ local rulez = require('rulez')
 
 -- Map useful functions outside
 calc = utility.calc
-notify_at = utility.notify_at
 money = currencies.recalc
 conv = utility.conversion
 
