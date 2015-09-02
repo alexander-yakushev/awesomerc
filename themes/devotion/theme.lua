@@ -10,7 +10,7 @@ end
 theme.name = "Devotion 2.0"
 theme.theme_dir = util.getdir("config") .. "/themes/devotion"
 
-theme.wallpapers = { res("wallpapers/wheat-field.jpg"),
+theme.wallpapers = { res("wallpapers/umbrella.jpg"),
                      res("wallpapers/sunset-mood.jpg") }
 theme.icon_dir      = res("icons")
 
@@ -33,8 +33,8 @@ theme.bg_normal       = "#00000099"
 theme.bg_focus        = "#00000033"
 
 -- theme.motive          = "#82ee76" -- spring
-theme.motive          = "#E67B50" -- summer
--- theme.motive          = "#dbaf5d" -- autumn
+-- theme.motive          = "#e67b50" -- summer
+theme.motive          = "#dbaf5d" -- autumn
 -- theme.motive          = "#76eec6" -- winter
 
 theme.bg_normal_color = "#00000099"
