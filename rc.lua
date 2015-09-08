@@ -63,13 +63,12 @@ end
 
 herder.setup {
    { rule = { hostname = "heather" },
-     properties = { configs = { "x220" },
-                    hosts = { local_ip = "10.140.28.1",
+     properties = { hosts = { local_ip = "10.140.28.1",
                               router_ip = "192.168.1.1" } } },
    { rule = { env_flag = "dbg" },
      properties = { debugging = true } },
    { rule = { },
-     properties = { configs = { "/etc/xdg/awesome/rc.lua" } } }
+     properties = { configs = { "main" } } }
 }
 
 herder.start()
