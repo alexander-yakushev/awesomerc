@@ -105,9 +105,11 @@ function iconic.lookup_icon(icon_file, args)
    else
       local icon_path = {}
       local icon_theme_paths = {}
-      local icon_theme = theme.icon_theme
-      if icon_theme then
-         table.insert(icon_theme_paths, '/usr/share/icons/' .. icon_theme .. '/')
+      if theme.icon_theme then
+         table.insert(icon_theme_paths, '/usr/share/icons/' .. theme.icon_theme .. '/')
+         if theme.icon_dir then
+            table.insert(icon_theme_paths, theme.icon_dir .. '/' .. theme.icon_theme .. '/')
+         end
       end
       table.insert(icon_theme_paths, '/usr/share/icons/hicolor/') -- fallback theme
 
