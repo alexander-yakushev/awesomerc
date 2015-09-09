@@ -40,8 +40,9 @@ local runOnceApps = {
    'xrdb -merge ~/.Xresources',
    'mpdscribble',
    'kbdd',
-   '/usr/bin/avfsd -o allow_root -o intr -o sync_read /avfs',
+   '/usr/bin/avfsd -o allow_root -o intr -o sync_read ' .. userdir .. '/.avfs',
    'owncloud',
+   'xscreensaver -no-splash',
    'pulseaudio --start',
    'redshift -l 60.8:10.7 -m vidmode -t 6500:5000',
 }
@@ -182,6 +183,7 @@ globalkeys = utility.keymap(
    "XF86MonBrightnessUp", function() os.execute("xbacklight +10") end,
    "XF86AudioLowerVolume", function() statusbar[mouse.screen].widgets.vol:dec() end,
    "XF86AudioRaiseVolume", function() statusbar[mouse.screen].widgets.vol:inc() end,
+   "XF86Eject", function() os.execute("xscreensaver-command -lock") end,
    "M-l", minitray.toggle,
    "M-space", function()
       awful.layout.inc(layouts, 1)

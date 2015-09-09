@@ -93,7 +93,6 @@ function cpu.update()
    local temp = 0
    for i = 0, 5 do -- reasonable maximum
       local file = "/sys/class/thermal/thermal_zone" .. i .. "/temp"
-      log.p(i, file)
       if util.file_readable(file) then
          local new_temp = utility.slurp(file, "*line")
          temp = math.max(temp, math.floor(tonumber(new_temp) / 1000))
