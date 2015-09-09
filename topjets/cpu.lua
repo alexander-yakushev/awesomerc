@@ -3,6 +3,7 @@ local l = require('layout')
 local utility = require('utility')
 local scheduler = require('scheduler')
 local base = require('topjets.base')
+local util = require('awful.util')
 
 -- Module topjets.cpu
 local cpu = base()
@@ -89,8 +90,17 @@ function cpu.update()
       cpu_active[i]  = active_new
    end
 
-   local temp = utility.slurp("/sys/class/thermal/thermal_zone0/temp", "*line")
-   temp = tonumber(temp) / 1000
+   local temp = 0
+   for i = 0, 5 do -- reasonable maximum
+      local file = "/sys/class/thermal/thermal_zone" .. i .. "/temp"
+      log.p(i, file)
+      if util.file_readable(file) then
+         local new_temp = utility.slurp(file, "*line")
+         temp = math.max(temp, math.floor(tonumber(new_temp) / 1000))
+      else
+         break
+      end
+   end
 
    cpu.refresh_all(temp, get_usage_icon(cpu_usage[1]))
 end
