@@ -65,10 +65,16 @@ herder.setup {
    { rule = { hostname = "heather" },
      properties = { hosts = { local_ip = "10.140.28.1",
                               router_ip = "192.168.1.1" } } },
+   { rule = { hostname = "kaylee" },
+     properties = { keys = { lock = "XF86PowerOff" },
+                    xbacklight_step = 5 } },
    { rule = { env_flag = "dbg" },
      properties = { debugging = true } },
    { rule = { },
-     properties = { configs = { "main" } } }
+     properties = { configs = { "main" },
+                    keys = { lock = "XF86ScreenSaver" },
+                    xbacklight_step = 10 } }
 }
 
+rc = herder.current -- Export configuration as rc
 herder.start()

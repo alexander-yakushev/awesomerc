@@ -56,6 +56,12 @@ function utility.autorun(apps, run_once_apps)
    end
 end
 
+function utility.cmd(command)
+   return function()
+      os.execute(command)
+   end
+end
+
 function utility.pop_spaces(s1,s2,maxsize)
    local sps = ""
    for i = 1, maxsize-string.len(s1)-string.len(s2) do

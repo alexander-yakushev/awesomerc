@@ -11,6 +11,7 @@ vista = require('vista')
 require("awful.autofocus")
 local beautiful = require('beautiful')
 local utility = require("utility")
+local cmd = utility.cmd
 
 userdir = utility.pslurp("echo $HOME", "*line")
 
@@ -31,7 +32,7 @@ conv = utility.conversion
 -- Autorun programs
 local autorunApps = {
    "setxkbmap -layout 'us,ua,ru' -variant ',winkeys,winkeys' -option grp:menu_toggle -option compose:ralt -option terminate:ctrl_alt_bksp",
-   'sleep 2; xmodmap ~/.xmodmap'
+   'sleep 2; xkbset m; xmodmap ~/.xmodmap'
 }
 
 local runOnceApps = {
@@ -141,7 +142,6 @@ globalkeys = utility.keymap(
    "M-k", function() awful.client.focus.byidx(-1) utility.refocus() end,
    "M-d", function() utility.view_first_empty() end,
    "M-u", awful.client.urgent.jumpto,
-   "M-u", awful.client.urgent.jumpto,
    "M-i", function() vista.jump_cursor() end,
    "M-Tab", function() awful.client.focus.history.previous() utility.refocus() end,
    "M-C-n", awful.client.restore,
@@ -178,12 +178,13 @@ globalkeys = utility.keymap(
          awful.util.getdir("cache") .. "/history_eval")
           end,
    -- Miscellaneous
-   "XF86ScreenSaver", function() os.execute(userdir .. "/scripts/screenlock") end,
-   "XF86MonBrightnessDown", function() os.execute("xbacklight -10") end,
-   "XF86MonBrightnessUp", function() os.execute("xbacklight +10") end,
+   "XF86ScreenSaver", cmd(userdir .. "/scripts/screenlock"),
+   "XF86MonBrightnessDown", cmd("xbacklight -" .. rc.xbacklight_step),
+   "XF86MonBrightnessUp", cmd("xbacklight +" .. rc.xbacklight_step),
    "XF86AudioLowerVolume", function() statusbar[mouse.screen].widgets.vol:dec() end,
    "XF86AudioRaiseVolume", function() statusbar[mouse.screen].widgets.vol:inc() end,
-   "XF86Eject", function() os.execute("xscreensaver-command -lock") end,
+   "XF86AudioMute", function() statusbar[mouse.screen].widgets.vol:mute() end,
+   rc.keys.lock, cmd("xscreensaver-command -activate"),
    "M-l", minitray.toggle,
    "M-space", function()
       awful.layout.inc(layouts, 1)
