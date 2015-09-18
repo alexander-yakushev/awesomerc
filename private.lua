@@ -16,7 +16,7 @@ local locations =
               gmt = 2 }}
 
 private.user = { name = "unlogic",
-                 loc = locations.ivfran }
+                 loc = locations.kiev }
 
 -- forecast.io API key is read from ./.forecast_io_api_key file
 private.weather = { api_key = utility.slurp(util.getdir("config") ..
