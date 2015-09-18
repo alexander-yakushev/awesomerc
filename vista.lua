@@ -1,3 +1,5 @@
+local awful = require('awful')
+
 -- Module for querying, managing and configuring screens.
 local vista = { primary = 1, secondary = 1, properties = {} }
 
@@ -78,10 +80,12 @@ function vista.jump_cursor(s)
                   y = geom.y + (geom.height / 2) }
 end
 
---- Smart Move a client to a screen. Default is next screen, cycling.
+--- Smart Move a client to a screen. Default is next screen, cycling. If
+-- same_tag is true, move client to the same tag of the next screen, not the
+-- currently active tag.
 -- @param c The client to move.
 -- @param s The screen number, default to current + 1.
-function vista.movetoscreen(c, s)
+function vista.movetoscreen(c, s, same_tag)
    c = c or client.focus
    local was_maximized = { h = false, v = false }
    if c.maximized_horizontal then
@@ -95,6 +99,15 @@ function vista.movetoscreen(c, s)
 
    if c then
       s = s or next_screen()
+      if same_tag then
+         for i, _tag in ipairs(awful.tag.gettags(c.screen)) do
+            if _tag.selected then
+               awful.client.movetotag(tags[s][i], c)
+               awful.tag.viewonly(tags[s][i])
+               break
+            end
+         end
+      end
       c.screen = s
       vista.jump_cursor(s)
    end
