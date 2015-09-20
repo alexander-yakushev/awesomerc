@@ -59,7 +59,7 @@ if naughty then
    presets.normal.border_color = theme.bg_focus_color
    presets.low.border_color = theme.bg_focus_color
    presets.critical.border_color = theme.motive
-   presets.critical.bg = theme.bg_urgent
+   presets.critical.bg = theme.bg_normal_color
    presets.critical.fg = theme.motive
 end
 

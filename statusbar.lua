@@ -134,6 +134,7 @@ function statusbar.initialize(bar, s, options)
 
    -- MPD widget
    if s > 1 then
+      -- MPD widget is one for all screens.
       widgets.mpd = statusbar.bars[1].widgets.mpd
    else
    local mpd = awesompd:create()
