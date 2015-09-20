@@ -146,14 +146,6 @@ function statusbar.initialize(bar, s, options)
    mpd.radio_covers = {
       ["listen.42fm.ru"] = "/home/unlogic/awesome/themes/devotion/stream_covers/42fm.jpg",
    }
-   local f = io.popen("cd /home/unlogic/awesome/themes/devotion/stream_covers/di/; ls")
-   for l in f:lines() do
-      local t = l:match("(.+)%.png")
-      if t ~= nil then
-         mpd.radio_covers["di.fm:80/di_" .. t] = "/home/unlogic/awesome/themes/devotion/stream_covers/di/" .. t .. ".png"
-      end
-   end
-   f:close()
    mpd:register_buttons({ { "", awesompd.MOUSE_LEFT, mpd:command_playpause() },
          { "Control", awesompd.MOUSE_SCROLL_UP, mpd:command_prev_track() },
          { "Control", awesompd.MOUSE_SCROLL_DOWN, mpd:command_next_track() },

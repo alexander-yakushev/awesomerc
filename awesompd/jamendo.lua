@@ -6,22 +6,13 @@
 
 -- Grab environment
 local awful = require('awful')
+local util = require('awful.util')
 
-local jamendo = {}
+local jamendo = {
+   covers_folder = util.getdir("cache") .. "/jamendo_covers/"
+}
 
 -- UTILITY STUFF
--- Checks whether file specified by filename exists.
-local function file_exists(filename, mode)
-   mode = mode or 'r'
-   f = io.open(filename, mode)
-   if f then
-      f:close()
-      return true
-   else
-      return false
-   end
-end
-
 local function str_interpose(coll, sep)
    if #coll == 0 then
       return ""
@@ -79,9 +70,8 @@ jamendo.current_request_table = { unit = "track",
 
 -- Local variables
 local jamendo_list = {}
-local cache_file = awful.util.getdir ("cache").."/jamendo_cache"
+local cache_file = util.getdir ("cache").."/jamendo_cache"
 local cache_header = "[version=1.1.0]"
-local album_covers_folder = awful.util.getdir("cache") .. "/jamendo_covers/"
 local default_mp3_stream = nil
 local search_template = { fields = { "id", "name" },
                           joins = {},
@@ -360,7 +350,7 @@ local function retrieve_cache()
       else 
          -- We encountered an outdated version of the cache
          -- file. Let's just remove it.
-         awful.util.spawn("rm -f " .. cache_file)
+         util.spawn("rm -f " .. cache_file)
       end
    end
 end
@@ -393,13 +383,13 @@ function jamendo.fetch_album_cover_request(track_id)
    if album_id == 0 then -- No cover for tracks without album!
       return nil
    end
-   local file_path = album_covers_folder .. album_id .. ".jpg"
+   local file_path = jamendo.covers_folder .. album_id .. ".jpg"
 
-   if not file_exists(file_path) then -- We need to download it  
+   if not util.file_readable(file_path) then -- We need to download it  
       -- First check if cache directory exists
-      f = io.popen('test -d ' .. album_covers_folder .. ' && echo t')
+      f = io.popen('test -d ' .. jamendo.covers_folder .. ' && echo t')
       if f:read("*line") ~= 't' then
-         awful.util.spawn("mkdir " .. album_covers_folder)
+         util.spawn("mkdir " .. jamendo.covers_folder)
       end
       f:close()
       
@@ -429,7 +419,7 @@ function jamendo.get_album_cover(track_id)
       f:close()
 
       -- Let's check if file is finally there, just in case
-      if not file_exists(file_path) then
+      if not util.file_readable(file_path) then
          return nil
       end
    end

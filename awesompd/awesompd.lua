@@ -36,6 +36,7 @@ end
 local utf8 = awesompd.try_require("utf8")
 asyncshell = awesompd.try_require("asyncshell")
 local jamendo = awesompd.try_require("jamendo")
+local di = awesompd.try_require("di")
 
 -- Constants
 awesompd.PLAYING = "Playing"
@@ -170,6 +171,11 @@ function awesompd.load_icons(path)
    awesompd.ICONS.PREV_BTN = awesompd.try_load(path .. "/prev_btn.png")
 end
 
+local function make_covers_folders()
+   awful.util.spawn("mkdir -p " .. jamendo.covers_folder)
+   awful.util.spawn("mkdir -p " .. di.covers_folder)
+end
+
 -- Function that returns a new awesompd object.
 function awesompd:create()
 -- Initialization
@@ -223,6 +229,7 @@ function awesompd:create()
    instance.widget:connect_signal("mouse::leave", function(c)
                                                  instance:hide_notification()
                                               end)
+   make_covers_folders()
    return instance
 end
 
@@ -473,8 +480,11 @@ function awesompd:command_show_menu()
                                        { "Artist", self:menu_jamendo_search_by(jamendo.SEARCH_ARTIST) },
                                        { "Album", self:menu_jamendo_search_by(jamendo.SEARCH_ALBUM) },
                                        { "Tag", self:menu_jamendo_search_by(jamendo.SEARCH_TAG) }}} }
+            local di_menu = di.menu(function(channel)
+                  self:add_di_stream(channel)
+            end)
             local browse_menu = self:menu_jamendo_browse()
-            if browse_menu then 
+            if browse_menu then
                table.insert(jamendo_menu, browse_menu)
             end
             table.insert(jamendo_menu, self:menu_jamendo_format())
@@ -484,8 +494,9 @@ function awesompd:command_show_menu()
                          { "Options", self:menu_options() },
                          { "List", self:menu_list() },
                          { "Playlists", self:menu_playlists() },
+                         { "Digitally Imported", di_menu },
                          { "Jamendo", jamendo_menu } }
-         end 
+         end
          table.insert(new_menu, { "Servers", self:menu_servers() }) 
          self.main_menu = awful.menu({ items = new_menu, theme = { width = 300 } }) 
          self.recreate_menu = false 
@@ -825,6 +836,14 @@ function awesompd:add_jamendo_tracks(track_table)
    end
    self.recreate_menu = true
    self.recreate_list = true
+end
+
+function awesompd:add_di_stream(channel)
+   self:command("add '" .. di.form_stream_url(channel.link) .. "'")
+   self.recreate_menu = true
+   self.recreate_list = true
+   self:show_notification("Digitally Imported",
+                          format('Added channel "' .. channel.name .. '"'))
 end
 
 -- /// End of menu generation functions ///
@@ -1200,7 +1219,7 @@ function awesompd:get_cover(track)
          end
       end
    end
-   return radio_cover or jamendo.try_get_cover(track) or
+   return radio_cover or jamendo.try_get_cover(track) or di.try_get_cover(track) or
       self:try_get_local_cover(track) or self.ICONS.DEFAULT_ALBUM_COVER
 end
 
