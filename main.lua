@@ -58,7 +58,11 @@ utility.load_theme("devotion")
 vista.setup {
    { rule = { name = "LVDS1" },
      properties = { secondary = true } },
+   { rule = { name = "eDP1" },
+     properties = { secondary = true } },
    { rule = { name = "VGA1" },
+     properties = { primary = true } },
+   { rule = { name = "DP1" },
      properties = { primary = true } },
    { rule = { ratio = "1.25-" },
      properties = { wallpaper = beautiful.wallpapers[2],

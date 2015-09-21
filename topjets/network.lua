@@ -25,7 +25,7 @@ function network.init()
       icons[k] = base.icon(v, { 24, 128 }, "status")
    end
 
-   system.network.interfaces = { "eth0", "wlan0" }
+   system.network.interfaces = rc.interfaces or { "eth0", "wlan0" }
    system.network.hosts = hosts
    system.network.add_connection_callback(network.connection_callback)
    system.network.add_latency_callback(network.latency_callback)
