@@ -1,7 +1,9 @@
 local awful = require('awful')
+local utility = require('utility')
 
 -- Module for querying, managing and configuring screens.
-local vista = { primary = 1, secondary = 1, properties = {} }
+local vista = { primary = 1, secondary = 1, properties = {},
+                baseline_dpi = 125}
 
 local function merge(src, dst)
    for k, v in pairs(src) do
@@ -16,6 +18,15 @@ local function screen_name(scr)
       break
    end
    return name
+end
+
+local function screen_idx(name)
+   for i = 1, screen.count() do
+      if screen_name(screen[i]) == name then
+         return i
+      end
+   end
+   return 1
 end
 
 local function matches(s, rule)
@@ -118,6 +129,29 @@ function vista.movetoscreen(c, s, same_tag)
    if was_maximized.v then
       c.maximized_vertical = true
    end
+end
+
+function vista.xrandr()
+   local result = {}
+   local f = io.popen('xrandr')
+   for l in f:lines() do
+      if l:match("[%w%d]+ connected") then
+         local display_name, pixel_w, pixel_h, mm_w, mm_h =
+            l:match("([%w%d]+) connected (%d+)x(%d+)%+%d+%+%d+[^%d]+(%d+)mm x (%d+)mm")
+         local d_tbl = { name = display_name,
+                         width = { px = tonumber(pixel_w), mm = tonumber(mm_w) },
+                         height = { px = tonumber(pixel_h), mm = tonumber(mm_h) } }
+         d_tbl.ratio = d_tbl.width.px / d_tbl.height.px
+         if d_tbl.width.mm > 0 then
+            d_tbl.dpi = math.floor(d_tbl.width.px / d_tbl.width.mm * 25.4)
+         else
+            -- Probably a Xephyr output
+            d_tbl.dpi = 125
+         end
+         result[screen_idx(display_name)] = d_tbl
+      end
+   end
+   log.n( result )
 end
 
 return setmetatable(vista, { __index = vista.properties })
