@@ -63,10 +63,14 @@ end
 
 herder.setup {
    { rule = { hostname = "heather" },
-     properties = { hosts = { local_ip = "10.140.28.1",
+     properties = { interfaces = { "wlan0" },
+                    hosts = { local_ip = "10.140.28.1",
                               router_ip = "192.168.1.1" } } },
    { rule = { hostname = "kaylee" },
-     properties = { keys = { lock = "XF86PowerOff" },
+     properties = { interfaces = { "wlp3s0" },
+                    hosts = { local_ip = "62.244.14.21",
+                              router_ip = "192.168.2.1" },
+                    keys = { lock = "XF86PowerOff" },
                     xbacklight_step = 5 } },
    { rule = { env_flag = "dbg" },
      properties = { debugging = true } },

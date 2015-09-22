@@ -24,7 +24,14 @@ function table.pprint(tbl, spc)
             pr(",\n" .. spaces(spc))
          end
       end
-      for k, v in pairs(tbl) do
+      -- Walk the hashtable in alphabetical order.
+      local keys = {}
+      for k, _ in pairs(tbl) do
+         table.insert(keys, k)
+      end
+      table.sort(keys)
+      for _ , k in ipairs(keys) do
+         local v = tbl[k]
          if not (type(k) == "number" and k <= #tbl) then
             empty = false
             if type(k) == "string" then
