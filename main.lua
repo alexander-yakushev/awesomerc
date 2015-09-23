@@ -152,6 +152,7 @@ globalkeys = utility.keymap(
    -- Application launching
    "XF86Launch1", function() utility.spawn_in_terminal("ncmpc") end,
    "Scroll_Lock", smartmenu.show,
+   "XF86LaunchB", smartmenu.show,
    "M-p", function() menubar.show() end,
    "M-=", dict.lookup_word,
    "Print", function() awful.util.spawn("snap " .. os.date("%Y%m%d_%H%M%S")) end,

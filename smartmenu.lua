@@ -39,6 +39,7 @@ function smartmenu.show()
                                          { "&Ethernet", netpower("on off") },
                                          { "&Wireless", netpower("off on") },
                                          { "&Neither", netpower("off off") } } },
+                         { '&music', function() utility.spawn_in_terminal("ncmpc") end },
                          { '&display', vista.xrandr.menu() } },
                       theme = { width = 150 } }
    local m = menu(mainmenu)
