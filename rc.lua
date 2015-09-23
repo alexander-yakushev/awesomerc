@@ -2,7 +2,6 @@ local util = require('awful.util')
 
 -- Module for individually configuring Awesome for different machines.
 herder = { current = {} }
-setmetatable(herder, { __index = function (_, _) return herder.current end })
 local rc_folder = util.getdir("config")
 
 local function merge(src, dst)
