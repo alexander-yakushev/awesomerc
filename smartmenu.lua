@@ -30,20 +30,6 @@ local function netpower(action)
    return string.format("sudo %s %s", np_script, action)
 end
 
-local function xrandr_menu()
-   local xrandr = function(args)
-      return function()
-         util.spawn("xrandr " .. args)
-      end
-   end
-   return {
-      { "&LVDS1", xrandr("--output LVDS1 --auto --output VGA1 --off") },
-      { "&VGA1", xrandr("--output LVDS1 --off --output VGA1 --auto") },
-      { "LV&DS1+VGA1", {
-           { "&Right of", xrandr("--output VGA1 --auto --right-of LVDS1 --auto") },
-           { "&Below", xrandr("--output VGA1 --auto --below LVDS1 --auto") } } } }
-end
-
 function smartmenu.show()
    local mainmenu = { items = {
                          { '&awesome', { { "restart", awesome.restart },
@@ -53,7 +39,8 @@ function smartmenu.show()
                                          { "&Ethernet", netpower("on off") },
                                          { "&Wireless", netpower("off on") },
                                          { "&Neither", netpower("off off") } } },
-                         { '&display', xrandr_menu() } },
+                         { '&music', function() utility.spawn_in_terminal("ncmpc") end },
+                         { '&display', vista.xrandr.menu() } },
                       theme = { width = 150 } }
    local m = menu(mainmenu)
    m:show()
