@@ -112,8 +112,9 @@ end
 
 -- Configure menubar
 menubar.cache_entries = true
-menubar.app_folders = { "/usr/share/applications/" }
-menubar.show_categories = true
+menubar.app_folders = { "/usr/share/applications/",
+                        awful.util.getdir("config") .. "/scripts/" }
+menubar.show_categories = false
 
 -- Interact with snap script
 function snap(filename)
@@ -266,13 +267,13 @@ rulez.init({ { rule = { },
 client.connect_signal("manage",
                       function (c, startup)
                          -- Enable sloppy focus
-                         c:connect_signal("mouse::enter",
-                                          function(c)
-                                             if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
-                                             and awful.client.focus.filter(c) then
-                                                client.focus = c
-                                             end
-                         end)
+                         -- c:connect_signal("mouse::enter",
+                         --                  function(c)
+                         --                     if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
+                         --                     and awful.client.focus.filter(c) then
+                         --                        client.focus = c
+                         --                     end
+                         -- end)
 
                          if not startup then
                             -- Put windows in a smart way, only if they does not set an initial position.
