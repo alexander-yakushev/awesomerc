@@ -14,12 +14,12 @@ theme.wallpapers = { res("wallpapers/umbrella.jpg"),
                      res("wallpapers/sunset-mood.jpg") }
 theme.icon_dir      = res("icons")
 
-theme.font          = "sans 9"
+theme.font          = "sans " .. vista.scale(9)
 
 -- Menu settings
 theme.menu_submenu_icon = res("icons/submenu.png")
-theme.menu_height       = 15
-theme.menu_width        = 110
+theme.menu_height       = vista.scale(15)
+theme.menu_width        = vista.scale(110)
 theme.menu_border_width = 0
 
 theme.bg_systray = "#222222"

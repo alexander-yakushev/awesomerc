@@ -36,12 +36,12 @@ function statusbar.create(s, options)
    statusbar.initialize(bar, s, options)
    local w = bar.widgets
 
-   local add_margin = function (_w) return l.margin { _w, margin = 5 } end
+   local add_margin = function (_w) return l.margin { _w, margin = vista.scale(5) } end
 
    local layout = l.align {
       start = l.fixed { l.midpoint { l.margin { l.exact { w.menu_icon,
-                                                          size = 32 },
-                                                margin = (options.width - 32) / 2 },
+                                                          size = vista.scale(32) },
+                                                margin = (options.width - vista.scale(32)) / 2 },
                                      vertical = is_v },
                         w.prompt,
                         vertical = is_v },
@@ -49,13 +49,13 @@ function statusbar.create(s, options)
       finish = l.fixed (
          map(add_margin,
              { (is_v and
-                   l.fixed { l.margin { w.weather, margin_bottom = 5 },
-                             l.margin { w.net, margin_top = 5 },
+                   l.fixed { l.margin { w.weather, margin_bottom = vista.scale(5) },
+                             l.margin { w.net, margin_top = vista.scale(5) },
                              vertical = true } or
                    l.flex { w.weather, w.net, vertical = true }),
                 (is_v and
-                    l.fixed { l.margin { w.kbd, margin_bottom = 5 },
-                              l.margin { w.cpu, margin_top = 5 },
+                    l.fixed { l.margin { w.kbd, margin_bottom = vista.scale(5) },
+                              l.margin { w.cpu, margin_top = vista.scale(5) },
                               vertical = true } or
                     l.flex { w.kbd, w.cpu, vertical = true }),
                 l.flex { w.vol,
@@ -158,7 +158,7 @@ function statusbar.initialize(bar, s, options)
          { "", "XF86AudioPrev", mpd:command_prev_track() },
          { "", "XF86AudioNext", mpd:command_next_track() }})
    mpd:run()
-   mpd:init_onscreen_widget({ x = 20, y = -30, font = "helvetica 11", screen = vista.primary })
+   mpd:init_onscreen_widget({ x = vista.scale(20), y = -vista.scale(30), font = "helvetica " .. vista.scale(11), screen = vista.primary })
    widgets.mpd = mpd
    end
 

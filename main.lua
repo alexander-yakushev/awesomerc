@@ -66,11 +66,11 @@ vista.setup {
      properties = { primary = true } },
    { rule = { ratio = "1.25-" },
      properties = { wallpaper = beautiful.wallpapers[2],
-                    statusbar = { position = "top", width = 38,
+                    statusbar = { position = "top", width = vista.scale(38),
                                   unitybar_thin_mode = true } } },
    { rule = {},
      properties = { wallpaper = beautiful.wallpapers[1],
-                    statusbar = { position = "right", width = 58 } } } }
+                    statusbar = { position = "right", width = vista.scale(58) } } } }
 
 -- Wallpaper
 for s = 1, screen.count() do

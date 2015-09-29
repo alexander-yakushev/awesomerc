@@ -13,7 +13,7 @@ local function flashmanager()
    end
    local f = io.popen("sudo " .. fm_script)
    if (f ~= nil) then
-      local actions = { theme = { width = 300 } }
+      local actions = { theme = { width = vista.scale(300) } }
       local i = 1
       for l in f:lines() do
          table.insert(actions, { string.format("[&%i] %s", i, l),
@@ -31,7 +31,7 @@ function smartmenu.show()
                          { '&flashmanager', flashmanager() },
                          { '&music', function() utility.spawn_in_terminal("ncmpc") end },
                          { '&display', vista.xrandr.menu() } },
-                      theme = { width = 150 } }
+                      theme = { width = vista.scale(150) } }
    local m = menu(mainmenu)
    m:show()
 end

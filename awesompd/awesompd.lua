@@ -219,7 +219,7 @@ function awesompd:create()
    instance.rdecorator = " "
    instance.jamendo_format = awesompd.FORMAT_MP3
    instance.show_album_cover = true
-   instance.album_cover_size = 50
+   instance.album_cover_size = vista.scale(50)
    instance.browser = "firefox"
    
 -- Widget configuration
@@ -1285,10 +1285,10 @@ function awesompd:init_onscreen_widget(args)
    local args = args or {}
    local scr = args.screen or 1
    local scrgeom = screen[scr].geometry -- workarea
-   local cover_size = args.cover_size or 110
-   local cover_shift_left = 10
-   local width = cover_size + 300
-   local height = 90
+   local cover_size = vista.scale(args.cover_size or 110)
+   local cover_shift_left = vista.scale(10)
+   local width = vista.scale(cover_size + 300)
+   local height = vista.scale(90)
    local x = args.x or 20
    local y = args.y or -20
    local font = args.font or beautiful.font or "sans 8"
@@ -1324,13 +1324,13 @@ function awesompd:init_onscreen_widget(args)
    local track_text = wibox.widget.textbox()
    track_text:set_valign("center")
 
-   local track_prbar = awful.widget.progressbar({ height = 5 })
+   local track_prbar = awful.widget.progressbar({ height = vista.scale(5) })
    track_prbar:set_border_color(args.prbar_border_color or "#444444")
    track_prbar:set_background_color(args.prbar_bg_color or "#444444")
    track_prbar:set_color(args.prbar_fg_color or "#aaaaaa")
    track_prbar:set_max_value(100)
 
-   local v_margin = 6
+   local v_margin = vista.scale(6)
    local with_margins = wibox.layout.margin
    ver_layout:add(with_margins(track_text, 0, 0, v_margin, 0))
    ver_layout:add(with_margins(track_prbar, 0, 10, v_margin, 0))
@@ -1357,7 +1357,7 @@ function awesompd:init_onscreen_widget(args)
                                    0, v_margin, 0, 0))
 
    bottom_layout:set_left(buttons_layout)
-   bottom_layout:set_right(with_margins(status_text, 0, 10, 0, 0))
+   bottom_layout:set_right(with_margins(status_text, 0, vista.scale(10), 0, 0))
 
    local player_wb = wibox({ bg = args.color or beautiful.bg_normal,
                              height = height,

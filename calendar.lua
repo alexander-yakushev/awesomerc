@@ -6,7 +6,7 @@ local iconic = require("iconic")
 
 local calendar = { text_color = theme.fg_normal or "#FFFFFF",
                    today_color = theme.fg_focus or "#00FF00",
-                   font = theme.font or 'monospace 8' }
+                   font = theme.font or 'monospace ' .. vista.scale(8) }
 
 local offset = 0
 local widget = nil
