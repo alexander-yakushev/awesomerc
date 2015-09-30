@@ -106,7 +106,7 @@ function statusbar.initialize(bar, s, options)
 
    -- Battery widget
    widgets.battery = topjets.battery
-   { { name = "ThinkPad X220", primary = true,
+   { { name = rc.laptop_name or "Laptop", primary = true,
        interval = 10, update_fn = topjets.battery.get_local },
       { name = "OnePlus One", addr = "192.168.1.142:5555",
         interval = 1800, update_fn = topjets.battery.get_via_adb,

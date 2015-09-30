@@ -64,10 +64,12 @@ end
 herder.setup {
    { rule = { hostname = "heather" },
      properties = { interfaces = { "wlan0" },
+                    laptop_name = "Thinkpad X220",
                     hosts = { local_ip = "10.140.28.1",
                               router_ip = "192.168.1.1" } } },
    { rule = { hostname = "kaylee" },
      properties = { interfaces = { "wlp3s0" },
+                    laptop_name = "Macbook Pro 13\"",
                     hosts = { local_ip = "62.244.14.21",
                               router_ip = "192.168.2.1" },
                     keys = { lock = "XF86PowerOff" },
