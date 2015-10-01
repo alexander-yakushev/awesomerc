@@ -22,8 +22,8 @@ function cpu.new(is_vertical)
    local cpu_icon = wibox.widget.imagebox()
    local cpu_text = wibox.widget.textbox()
 
-   local _widget = l.fixed { l.margin { l.constrain { cpu_icon, size = 24},
-                                        margin_right = 4 },
+   local _widget = l.fixed { l.margin { l.constrain { cpu_icon, size = vista.scale(24) },
+                                        margin_right = vista.scale(4) },
                              cpu_text }
 
    _widget.cpu_icon = cpu_icon

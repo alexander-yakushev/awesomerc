@@ -7,7 +7,7 @@ local processwatcher = {
    sorters = {
       { name = "CPU" , comp = function (a, b) return a.cpu > b.cpu end },
       { name = "Memory", comp = function (a, b) return a.mem > b.mem end } },
-   font = "monospace 9",
+   font = "monospace " .. vista.scale(9),
    line_count = 10,
    default = { max_line_count = 100} }
 
@@ -79,7 +79,7 @@ local function get_formatted_data()
    text = string.format('<span font="%s">%s</span>',
                         processwatcher.font, text)
    return { naughty = { title = title, text = text, timeout = 0,
-                        icon = processwatcher.icon, icon_size = 48 },
+                        icon = processwatcher.icon, icon_size = vista.scale(48) },
             pids = pids }
 end
 

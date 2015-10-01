@@ -21,8 +21,8 @@ function kbd.new()
    local kbd_icon = wibox.widget.imagebox(base.icon("format-text-bold", 24))
    local kbd_text = wibox.widget.textbox(layouts[0])
 
-   local _widget = l.fixed { l.margin { l.constrain { kbd_icon, size = 24},
-                                        margin_right = 4 },
+   local _widget = l.fixed { l.margin { l.constrain { kbd_icon, size = vista.scale(24) },
+                                        margin_right = vista.scale(4) },
                              kbd_text }
    _widget.kbd_text = kbd_text
 

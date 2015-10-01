@@ -55,6 +55,7 @@ local function matches(s, rule)
 end
 
 function vista.setup(rules)
+   vista.xrand_info = vista.xrandr.info()
    for s = 1, screen.count() do
       vista.properties[s] = {}
    end
@@ -132,7 +133,7 @@ function vista.movetoscreen(c, s, same_tag)
 end
 
 function vista.xrandr.info()
-   local result = {}
+   local result = { actual_dpi = vista.baseline_dpi }
    local f = io.popen('xrandr')
    local i, d_tbl, read_next_line = 1
    for l in f:lines() do
@@ -183,7 +184,7 @@ function vista.xrandr.info()
 end
 
 function vista.xrandr.set(native_on, external_on, position)
-   local info = vista.xrandr.info()
+   local info = vista.xrandr_info
    local cmd = "xrandr"
 
    local calc_sizes = function(disp, on)
@@ -235,7 +236,7 @@ end
 
 function vista.xrandr.menu()
    local set = function(a,b,c) return function() vista.xrandr.set(a,b,c) end end
-   local info = vista.xrandr.info()
+   local info = vista.xrandr_info
    if info[2] then -- Only makes sense if we have more than one display
       return {
          { "&Only", {
@@ -250,12 +251,15 @@ function vista.xrandr.menu()
 end
 
 function vista.scale(dimension, allow_float)
-   local scaled = dimension * (vista.actual_dpi / vista.baseline_dpi)
+   local info = vista.xrandr_info
+   local scaled = dimension * (info.actual_dpi / vista.baseline_dpi)
    if allow_float then
       return scaled
    else
       return math.floor(scaled)
    end
 end
+
+vista.xrandr_info = vista.xrandr.info()
 
 return setmetatable(vista, { __index = vista.properties })

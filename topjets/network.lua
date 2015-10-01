@@ -13,7 +13,7 @@ local short_labels = { "", "!DNS: ", "L: ", "R: " }
 local labels = { "World", "W/o DNS", "Local", "Router" }
 local tooltip = { title = "Network\t\tLatency\t\tLoss",
                   timeout = 0,
-                  icon_size = 48 }
+                  icon_size = vista.scale(48) }
 
 local icon_names = { wired = "network-transmit-receive",
                      wireless = "network-wireless-signal-excellent",
@@ -40,7 +40,7 @@ function network.new(is_v)
    local _widget =
       l.fixed { l.margin { l.midpoint { network_icon,
                                         vertical = is_v },
-                           margin_left = (is_v and 4 or 0), margin_right = 4 },
+                           margin_left = (is_v and 4 or 0), margin_right = vista.scale(4) },
                 l.midpoint { network_text,
                              vertical = is_v },
                 vertical = is_v }
