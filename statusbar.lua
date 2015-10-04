@@ -105,13 +105,7 @@ function statusbar.initialize(bar, s, options)
    widgets.mem = topjets.memory()
 
    -- Battery widget
-   widgets.battery = topjets.battery
-   { { name = rc.laptop_name or "Laptop", primary = true,
-       interval = 10, update_fn = topjets.battery.get_local },
-      { name = "OnePlus One", addr = "192.168.1.142:5555",
-        interval = 1800, update_fn = topjets.battery.get_via_adb,
-        charge = "capacity", status = "status" },
-   }
+   widgets.battery = topjets.battery()
    widgets.battery:buttons(keymap("LMB", terminal_with("sudo powertop")))
 
    -- Network widget

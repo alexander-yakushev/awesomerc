@@ -1,6 +1,5 @@
 local utility = require('utility')
 local wibox = require('wibox')
-local iconic = require('iconic')
 local scheduler = require('scheduler')
 local asyncshell = require('asyncshell')
 local awful = require('awful')
@@ -13,33 +12,31 @@ local battery = base { warning_threshold = 10,
 local icons
 
 function battery.init(devices)
-   if (devices == nil) or (#devices == 0) then
-      error("topjets.battery.new: need at least one device")
-   end
-   battery.devices = devices
+   battery.devices = devices or { { primary = true, interval = 10 } }
 
    local l_icon = function (icon_name)
-      return base.icon(icon_name, { 24, 128}, "status")
+      return base.icon("gpm-battery-" .. icon_name, { 24, 128}, "status")
    end
-   icons = { charging = { l_icon('gpm-battery-000-charging'),
-                          l_icon('gpm-battery-020-charging'),
-                          l_icon('gpm-battery-040-charging'),
-                          l_icon('gpm-battery-060-charging'),
-                          l_icon('gpm-battery-080-charging'),
-                          l_icon('gpm-battery-100-charging') },
-             discharging = { l_icon('gpm-battery-000'),
-                             l_icon('gpm-battery-020'),
-                             l_icon('gpm-battery-040'),
-                             l_icon('gpm-battery-060'),
-                             l_icon('gpm-battery-080'),
-                             l_icon('gpm-battery-charged') },
-             full = l_icon('gpm-battery-100'),
-             missing = l_icon('gpm-battery-empty') }
+
+   icons = { charging = { l_icon('000-charging'),
+                          l_icon('020-charging'),
+                          l_icon('040-charging'),
+                          l_icon('060-charging'),
+                          l_icon('080-charging'),
+                          l_icon('100-charging') },
+             discharging = { l_icon('000'),
+                             l_icon('020'),
+                             l_icon('040'),
+                             l_icon('060'),
+                             l_icon('080'),
+                             l_icon('charged') },
+             full = l_icon('100'),
+             missing = l_icon('empty') }
 
    for i, dev in ipairs(battery.devices) do
-      battery.data[i] = { off = true }
+      battery.data[i] = { }
       scheduler.register_recurring("topjets.battery" .. i, dev.interval,
-                                   function () dev.update_fn(i) end)
+                                   function () battery.get_local(i) end)
    end
 end
 
@@ -50,21 +47,17 @@ end
 function battery.update(dev_num, stats)
    local dev = battery.devices[dev_num]
    if stats == nil then
-      battery.data[dev_num] = { off = true }
       return
    end
    stats.disable_warning = battery.data[dev_num].disable_warning
 
    if stats.status:match("Discharging") then
       if stats.charge <= battery.warning_threshold and (not stats.disable_warning) then
-         naughty.notify({ title    = "Battery Warning",
-                          text     = dev.name .. " battery is low, " .. stats.charge .."%" .. " left.",
-                          timeout  = 0, position = "top_right",
-                          icon = icons.discharging[1][2], icon_size = 32,
-                          run = function(n)
-                             battery.data[dev_num].disable_warning = true
-                             naughty.destroy(n)
-                          end})
+         naughty.notify({ title = "Battery Warning",
+                          text = string.format("Battery is low, %s%% left.", stats.charge),
+                          timeout = 0, position = "top_right",
+                          icon = icons.discharging[1][2], icon_size = vista.scale(48) })
+         battery.data[dev_num].disable_warning = true
       end
       if (battery.data[dev_num] ~= nil) and (battery.data[dev_num].time_disc == nil) then
          stats.time_disc = os.time()
@@ -88,34 +81,18 @@ function battery.refresh(w, icon)
 end
 
 function battery.tooltip()
-   local function form_dev_str(i)
-      local dev = battery.devices[i]
-      local d = battery.data[i]
-      local onbattery = "\t"
-      if d.time_disc ~= nil then
-         onbattery = os.date("!%X",os.time() - d.time_disc)
-      end
-      if not d.off then
-         return string.format("%s\t%s%%\t\t%s\t%s",
-                              dev.name, d.charge,
-                              onbattery .. "\t",
-                              d.status_text or d.status)
-      end
+   local data = battery.data[1]
+   local text = "Status\t" .. data.status_text or data.status
+   if data.time_disc then
+      text = string.format("%s\nLasting\t%s", text, os.date("!%X",os.time() - data.time_disc))
    end
-   local text = form_dev_str(1)
-   for i = 2, #battery.devices do
-      local s = form_dev_str(i)
-      if s ~= nil then
-         text = text .. "\n" .. s
-      end
-   end
-   return { title = "Device\t\tCharge\tOn battery\tStatus", text = text,
-            icon = battery.data.icon[2], icon_size = 48,
+   return { title = string.format("Charge\t%s%%", data.charge),
+            text = text,
+            icon = battery.data.icon[2], icon_size = vista.scale(48),
             timout = 0 }
 end
 
 function battery.get_local(dev_num)
-   local dev = battery.devices[dev_num]
    local info = utility.pslurp("acpi", "*line")
    if not info or string.len(info) == 0 then
       battery.update(dev_num, { status = "Missing", charge = 0,
@@ -140,48 +117,6 @@ function battery.get_local(dev_num)
    battery.update(dev_num,
                   { status = status, charge = charge, time = time,
                     icon = icon, status_text = time or status })
-end
-
-function battery.get_adb_devices()
-   local f = asyncshell.demand("adb devices", 1)
-   if not f then
-      return {}
-   end
-   local devs = {}
-   f:read() -- Skip first
-   for l in f:lines() do
-      local dev = l:match("(%d+%.%d+%.%d+%.%d+:%d+).*")
-      if dev ~= nil then
-         devs[dev] = true
-      end
-   end
-   return devs
-end
-
-function battery.get_via_adb(dev_num)
-   local dev = battery.devices[dev_num]
-   local dir = dev.dir or "/sys/class/power_supply/battery"
-   local cmd, was_connected = "", true
-   if not battery.get_adb_devices()[dev.addr] then
-      cmd = "adb connect " .. dev.addr .. "; sleep 1;"
-      was_connected = false
-   end
-   cmd = string.format("%sadb -s %s shell cat %s/%s %s/%s",
-                       cmd, dev.addr, dir, dev.charge, dir, dev.status)
-   asyncshell.request(cmd, function(f)
-                         local res = nil
-                         local charge = f:read()
-                         local status = f:read()
-                         if charge ~= nil then
-                            res = { charge = tonumber(charge),
-                                    status = status }
-                         end
-                         battery.update(dev_num, res)
-                         if not was_connected then
-                            awful.util.spawn("adb disconnect", false)
-                         end
-                         f:close()
-   end)
 end
 
 return battery
