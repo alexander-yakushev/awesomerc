@@ -9,7 +9,7 @@ local minitray = { geometry = {} }
 
 local function show(first_time)
    local scrgeom = screen[mouse.screen].workarea
-   minitray.wibox.height = minitray.geometry.height or 20
+   minitray.wibox.height = minitray.geometry.height or vista.scale(20)
    local items = awesome.systray()
    if items == 0 then items = 1 end
    if first_time then items = 4 end

@@ -42,7 +42,7 @@ local runOnceApps = {
    'mpdscribble',
    'kbdd',
    '/usr/bin/avfsd -o allow_root -o intr -o sync_read ' .. userdir .. '/.avfs',
-   'owncloud',
+   'megasync',
    'xscreensaver -no-splash',
    'pulseaudio --start',
    'redshift -l 60.8:10.7 -m vidmode -t 6500:5000',

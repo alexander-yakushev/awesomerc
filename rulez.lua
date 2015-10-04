@@ -59,7 +59,8 @@ end
 function table.read(f)
    local ftables, err = loadfile(f)
    if err then
-      error("Failed reading rules file: " .. f)
+      log.e("Failed reading rules file: " .. f)
+      return nil
    end
    local tables = ftables()
    return tables
