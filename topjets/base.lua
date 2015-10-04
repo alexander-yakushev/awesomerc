@@ -15,14 +15,13 @@ local function constructor(wdg_class)
       local wdg = wdg_class.new(...)
       if wdg_class.tooltip then
          wdg._tooltip_position = base.tooltip_position
-         wdg._tooltip_icon_size = vista.scale(base.tooltip_icon_size_dpi)
          utility.add_hover_tooltip(wdg, function(...)
                                       local tt = wdg_class.tooltip()
                                       if tt.position == nil then
                                          tt.position = wdg._tooltip_position
                                       end
                                       if tt.icon_size == nil then
-                                         tt.icon_size = wdg._tooltip_icon_size
+                                         tt.icon_size = vista.scale(base.tooltip_icon_size_dpi)
                                       end
                                       if tt.timeout == nil then
                                          tt.timeout = 0
@@ -53,22 +52,33 @@ function base.define(t)
                       end })
 end
 
-function base.icon(name, sizes, category)
+function base.icon(name, category)
    local args = {}
    if category ~= nil then
       args.icon_types = { "/" .. category .. "/" }
    end
-   if type(sizes) == "table" then
-      local result = {}
-      for i, size in ipairs(sizes) do
-         args.preferred_size = size .. "x" .. size
-         result[i] = iconic.lookup_icon(name, args)
-      end
-      return result
-   else
-      args.preferred_size = sizes .. "x" .. sizes
-      return iconic.lookup_icon(name, args)
+   result = {}
+
+   local small_size = "24x24"
+   if vista.scale(1, true) > 1.1 then
+      -- For HiDPI screens small icons are also 128px wide.
+      small_size = "128x128"
    end
+
+   args.preferred_size = small_size
+   result.small = iconic.lookup_icon(name, args)
+
+   args.preferred_size = "128x128"
+   result.large = iconic.lookup_icon(name, args)
+
+   return result
+end
+
+function base.notify(opts)
+   opts.position = opts.position or base._tooltip_position
+   opts.icon_size = opts.icon_size or vista.scale(base.tooltip_icon_size_dpi)
+   opts.screen = opts.screen or mouse.screen
+   return naughty.notify(opts)
 end
 
 return setmetatable(base, { __call = function(_, ...) return base.define(...) end})

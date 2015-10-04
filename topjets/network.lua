@@ -20,7 +20,7 @@ local icons = {}
 
 function network.init()
    for k, v in pairs(icon_names) do
-      icons[k] = base.icon(v, { 24, 128 }, "status")
+      icons[k] = base.icon(v, "status")
    end
 
    system.network.interfaces = rc.interfaces or { "eth0", "wlan0" }
@@ -32,7 +32,7 @@ function network.init()
 end
 
 function network.new(is_v)
-   local network_icon = wibox.widget.imagebox(icons.disconnected[2])
+   local network_icon = wibox.widget.imagebox(icons.disconnected.large)
    local network_text = wibox.widget.textbox()
 
    local _widget =
@@ -51,7 +51,7 @@ end
 
 function network.refresh(w, iface_type, data)
    if iface_type ~= nil then
-      w.network_icon:set_image(icons[iface_type][2])
+      w.network_icon:set_image(icons[iface_type].large)
       if iface_type == "none" then
          w.network_text:set_markup("")
       end
@@ -91,7 +91,7 @@ function network.tooltip()
 end
 
 function network.connection_callback(_, iface_type)
-   tooltip.icon = icons[iface_type][2]
+   tooltip.icon = icons[iface_type].large
    network.refresh_all(iface_type, nil)
 end
 

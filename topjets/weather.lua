@@ -58,7 +58,7 @@ end
 function weather.init()
    for _, t in pairs(cond_mapping) do
       local icon_name = t.icon
-      t.icon = base.icon(icon_name, { 24, 128 }, "status")
+      t.icon = base.icon(icon_name, "status")
    end
 
    scheduler.register_recurring("topjets_weather", 10,
@@ -91,7 +91,7 @@ end
 function weather.update_tooltip()
    local data = weather.data
    tooltip.title = forecast_line(data.currently, true)
-   tooltip.icon = condition(data.currently.icon).icon[2]
+   tooltip.icon = condition(data.currently.icon).icon.large
 
    local text = ""
    for i = 2, weather.days + 1 do
@@ -121,7 +121,7 @@ end
 
 function weather.refresh(w, temp, icon)
    w.w_text:set_markup(temp)
-   w.w_icon:set_image(icon)
+   w.w_icon:set_image(icon.large)
 end
 
 function weather.update()

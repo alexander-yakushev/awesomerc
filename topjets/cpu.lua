@@ -12,7 +12,7 @@ local icons = {}
 
 function cpu.init()
    for i, perc in ipairs({ "00", 25, 50, 75, 100 }) do
-      icons[i] = base.icon("indicator-cpufreq-" .. perc, 24, "status")
+      icons[i] = base.icon("indicator-cpufreq-" .. perc, "status")
    end
 
    scheduler.register_recurring("cpu_update", 5, cpu.update)
@@ -107,7 +107,7 @@ end
 function cpu.refresh(w, temp, icon)
    local line = string.format("%d%s°C", temp, w.is_vertical and "\n" or "")
    w.cpu_text:set_markup(line)
-   w.cpu_icon:set_image(icon)
+   w.cpu_icon:set_image(icon.small)
 end
 
 return cpu

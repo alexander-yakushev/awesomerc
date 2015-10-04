@@ -9,9 +9,9 @@ local icons = {}
 
 function volume.init()
    for i, level in ipairs({ "zero", "low", "medium", "high" }) do
-      icons[i] = base.icon("audio-volume-" .. level, { 24, 128 }, "status")
+      icons[i] = base.icon("audio-volume-" .. level, "status")
    end
-   icons.muted = base.icon("audio-volume-muted", { 24, 128 }, "status")
+   icons.muted = base.icon("audio-volume-muted", "status")
 
    scheduler.register_recurring("topjets_volume", 20, function()
                                    volume.update(io.popen("amixer get Master"))
@@ -43,12 +43,11 @@ local function get_master_infos(f)
 end
 
 function volume.notify(state, vol, icon)
-   local n = naughty.notify({ title = "Volume: " .. vol .. "%",
-                              text = "State: " .. state,
-                              screen = mouse.screen, position = "bottom_right",
-                              icon = icon, icon_size = vista.scale(32), timeout = 3,
-                              replaces_id = volume.notification_id})
-   volume.notification_id = n.id
+   volume.notification_id =
+      base.notify({ title = "Volume: " .. vol .. "%",
+                    text = "State: " .. state,
+                    position = "bottom_right", timeout = 3,
+                    icon = icon.large, replaces_id = volume.notification_id}).id
 end
 
 function volume.update(f, to_notify)
@@ -57,11 +56,11 @@ function volume.update(f, to_notify)
    local naughty_icon
 
    if state == "off" then
-      volume.refresh_all(icons.muted[1])
-      naughty_icon = icons.muted[2]
+      volume.refresh_all(icons.muted)
+      naughty_icon = icons.muted
    else
-      volume.refresh_all(icons[idx][1])
-      naughty_icon = icons[idx][2]
+      volume.refresh_all(icons[idx])
+      naughty_icon = icons[idx]
    end
 
    if to_notify then
@@ -70,7 +69,7 @@ function volume.update(f, to_notify)
 end
 
 function volume.refresh(w, icon)
-   w:set_image(icon)
+   w:set_image(icon.small)
 end
 
 function volume.inc()

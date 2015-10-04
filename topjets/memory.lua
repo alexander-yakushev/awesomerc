@@ -9,7 +9,7 @@ local icons = {}
 
 function memory.init()
    for i, perc in ipairs({ "00", 20, 40, 60, 80, 100 }) do
-      icons[i] = base.icon("brasero-disc-" .. perc, { 24, 128}, "actions")
+      icons[i] = base.icon("brasero-disc-" .. perc, "actions")
    end
    scheduler.register_recurring("memory_update", 10, memory.update)
 end
@@ -51,11 +51,11 @@ function memory.update()
    memory.data = _mem
    memory.data.icon = get_usage_icon(_mem.usep)
 
-   memory.refresh_all(memory.data.icon[1])
+   memory.refresh_all(memory.data.icon)
 end
 
 function memory.refresh(w, icon)
-   w:set_image(icon)
+   w:set_image(icon.small)
 end
 
 function memory.tooltip()
@@ -63,7 +63,7 @@ function memory.tooltip()
    return { title = string.format("Usage:\t %d%%", d.usep),
             text = string.format("Used:\t %d MB\nFree:\t %d MB\nTotal:\t %d MB",
                                  d.inuse, d.free, d.total),
-            icon = d.icon[2] }
+            icon = d.icon.large }
 end
 
 return memory

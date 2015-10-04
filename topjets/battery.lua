@@ -15,7 +15,7 @@ function battery.init(devices)
    battery.devices = devices or { { primary = true, interval = 10 } }
 
    local l_icon = function (icon_name)
-      return base.icon("gpm-battery-" .. icon_name, { 24, 128}, "status")
+      return base.icon("gpm-battery-" .. icon_name, "status")
    end
 
    icons = { charging = { l_icon('000-charging'),
@@ -51,13 +51,12 @@ function battery.update(dev_num, stats)
    end
    stats.disable_warning = battery.data[dev_num].disable_warning
 
-   if stats.status:match("Charging") then
-      if stats.charge >= battery.warning_threshold and (not stats.disable_warning) then
-         naughty.notify({ title = "Battery Warning",
-                          text = string.format("Battery is low, %s%% left.", stats.charge),
-                          timeout = 0, position = "top_right",
-                          icon = icons.discharging[1][2], icon_size = vista.scale(48) })
-         battery.data[dev_num].disable_warning = true
+   if stats.status:match("Discharging") then
+      if stats.charge <= battery.warning_threshold and (not stats.disable_warning) then
+         base.notify { title = "Battery Warning",
+                       text = string.format("Battery is low, %s%% left.", stats.charge),
+                       timeout = 0, position = "top_right", icon = icons.discharging[1].large }
+         stats.disable_warning = true
       end
       if (battery.data[dev_num] ~= nil) and (battery.data[dev_num].time_disc == nil) then
          stats.time_disc = os.time()
@@ -71,13 +70,13 @@ function battery.update(dev_num, stats)
    end
    if dev.primary then
       battery.data.icon = stats.icon
-      battery.refresh_all(stats.icon[1])
+      battery.refresh_all(stats.icon)
    end
    battery.data[dev_num] = stats
 end
 
 function battery.refresh(w, icon)
-   w:set_image(icon)
+   w:set_image(icon.small)
 end
 
 function battery.tooltip()
@@ -88,7 +87,7 @@ function battery.tooltip()
    end
    return { title = string.format("Charge\t%s%%", data.charge),
             text = text,
-            icon = battery.data.icon[2] }
+            icon = battery.data.icon.large }
 end
 
 function battery.get_local(dev_num)
