@@ -1,8 +1,10 @@
 local iconic = require('iconic')
 local utility = require('utility')
+local vista = require('vista')
 
 -- Basis for all topjets widgets
-local base = { tooltip_position = "bottom_right" }
+local base = { tooltip_position = "bottom_right",
+               tooltip_icon_size_dpi = 48 }
 
 local function constructor(wdg_class)
    return function (...)
@@ -13,10 +15,17 @@ local function constructor(wdg_class)
       local wdg = wdg_class.new(...)
       if wdg_class.tooltip then
          wdg._tooltip_position = base.tooltip_position
+         wdg._tooltip_icon_size = vista.scale(base.tooltip_icon_size_dpi)
          utility.add_hover_tooltip(wdg, function(...)
                                       local tt = wdg_class.tooltip()
                                       if tt.position == nil then
                                          tt.position = wdg._tooltip_position
+                                      end
+                                      if tt.icon_size == nil then
+                                         tt.icon_size = wdg._tooltip_icon_size
+                                      end
+                                      if tt.timeout == nil then
+                                         tt.timeout = 0
                                       end
                                       return tt
          end)

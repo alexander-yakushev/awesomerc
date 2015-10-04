@@ -63,8 +63,7 @@ function memory.tooltip()
    return { title = string.format("Usage:\t %d%%", d.usep),
             text = string.format("Used:\t %d MB\nFree:\t %d MB\nTotal:\t %d MB",
                                  d.inuse, d.free, d.total),
-            icon = d.icon[2], icon_size = vista.scale(48),
-            timeout = 0 }
+            icon = d.icon[2] }
 end
 
 return memory

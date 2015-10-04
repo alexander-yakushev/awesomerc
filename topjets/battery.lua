@@ -51,8 +51,8 @@ function battery.update(dev_num, stats)
    end
    stats.disable_warning = battery.data[dev_num].disable_warning
 
-   if stats.status:match("Discharging") then
-      if stats.charge <= battery.warning_threshold and (not stats.disable_warning) then
+   if stats.status:match("Charging") then
+      if stats.charge >= battery.warning_threshold and (not stats.disable_warning) then
          naughty.notify({ title = "Battery Warning",
                           text = string.format("Battery is low, %s%% left.", stats.charge),
                           timeout = 0, position = "top_right",
@@ -88,8 +88,7 @@ function battery.tooltip()
    end
    return { title = string.format("Charge\t%s%%", data.charge),
             text = text,
-            icon = battery.data.icon[2], icon_size = vista.scale(48),
-            timout = 0 }
+            icon = battery.data.icon[2] }
 end
 
 function battery.get_local(dev_num)

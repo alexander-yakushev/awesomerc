@@ -11,9 +11,7 @@ local hosts = { "github.com", "195.24.232.203",
                 custom_hosts.router_ip or "192.168.1.1" }
 local short_labels = { "", "!DNS: ", "L: ", "R: " }
 local labels = { "World", "W/o DNS", "Local", "Router" }
-local tooltip = { title = "Network\t\tLatency\t\tLoss",
-                  timeout = 0,
-                  icon_size = vista.scale(48) }
+local tooltip = { title = "Network\t\tLatency\t\tLoss" }
 
 local icon_names = { wired = "network-transmit-receive",
                      wireless = "network-wireless-signal-excellent",

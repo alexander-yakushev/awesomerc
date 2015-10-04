@@ -16,10 +16,7 @@ local weather = base {
    update_freq = 300,
 }
 
-local tooltip = {
-   title = "NO DATA",
-   timeout = 0,
-   icon_size = 48 }
+local tooltip = { title = "NO DATA" }
 
 local last_updated = nil
 
