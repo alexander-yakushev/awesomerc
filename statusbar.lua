@@ -6,7 +6,6 @@ local topjets = require('topjets')
 local beautiful = require('beautiful')
 local awesompd = require('awesompd/awesompd')
 local iconic = require('iconic')
-local calendar = require('calendar')
 local smartmenu = require('smartmenu')
 local keymap = utility.keymap
 
