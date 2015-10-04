@@ -85,13 +85,12 @@ function statusbar.initialize(bar, s, options)
 
    -- Clock
    widgets.time = topjets.clock(options.width)
-   calendar.register(widgets.time)
    widgets.time:buttons(
       keymap("LMB", function() awful.util.spawn(software.browser_cmd ..
                                                 "calendar.google.com", false) end,
-             "MMB", function() calendar.switch_month(0) end,
-             "WHEELUP", function() calendar.switch_month(-1) end,
-             "WHEELDOWN", function() calendar.switch_month(1) end))
+             "MMB", function() topjets.clock.calendar.switch_month(0) end,
+             "WHEELUP", function() topjets.clock.calendar.switch_month(-1) end,
+             "WHEELDOWN", function() topjets.clock.calendar.switch_month(1) end))
 
    -- CPU widget
    widgets.cpu = topjets.cpu(is_vertical)

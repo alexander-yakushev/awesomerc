@@ -15,6 +15,7 @@ theme.wallpapers = { res("wallpapers/umbrella.jpg"),
 theme.icon_dir      = res("icons")
 
 theme.font          = "sans " .. vista.scale(9)
+theme.mono_font     = "monospace " .. vista.scale(9)
 
 -- Menu settings
 theme.menu_submenu_icon = res("icons/submenu.png")

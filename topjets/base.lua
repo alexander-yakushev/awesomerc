@@ -16,7 +16,7 @@ local function constructor(wdg_class)
       if wdg_class.tooltip then
          wdg._tooltip_position = base.tooltip_position
          utility.add_hover_tooltip(wdg, function(...)
-                                      local tt = wdg_class.tooltip()
+                                      local tt = wdg_class.tooltip(wdg, ...)
                                       if tt.position == nil then
                                          tt.position = wdg._tooltip_position
                                       end
