@@ -236,7 +236,7 @@ end
 
 function vista.xrandr.menu()
    local set = function(a,b,c) return function() vista.xrandr.set(a,b,c) end end
-   local info = vista.xrandr_info
+   local info = vista.xrandr.info()
    if info[2] then -- Only makes sense if we have more than one display
       return {
          { "&Only", {
