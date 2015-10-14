@@ -111,7 +111,7 @@ end
 function weather.callback(f)
    weather.data = json.decode(f:read("*all"))
    weather.refresh_all(format("%d°C", utility.round(weather.data.currently.temperature)),
-                       cond_mapping[weather.data.currently.icon].icon[2] or cond_mapping.clear.icon[2])
+                       cond_mapping[weather.data.currently.icon].icon or cond_mapping.clear.icon)
    if weather.data.currently then
       weather.update_tooltip()
    end
