@@ -87,7 +87,9 @@ end
 
 --- Jump cursor to the center of the screen. Default is next screen, cycling.
 function vista.jump_cursor(s)
-   local geom = screen[s or next_screen()].geometry
+   local new_s = s or next_screen()
+   local geom = screen[new_s].geometry
+   awful.screen.focus(new_s)
    mouse.coords { x = geom.x + (geom.width / 2),
                   y = geom.y + (geom.height / 2) }
 end

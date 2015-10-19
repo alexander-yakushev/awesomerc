@@ -6,7 +6,7 @@ local base = require('topjets.base')
 local network = base()
 
 local custom_hosts = rc.hosts or {}
-local hosts = { "github.com", "195.24.232.203",
+local hosts = { "github.com", "192.30.252.130",
                 custom_hosts.local_ip or "10.0.0.1",
                 custom_hosts.router_ip or "192.168.1.1" }
 local short_labels = { "", "!DNS: ", "L: ", "R: " }
