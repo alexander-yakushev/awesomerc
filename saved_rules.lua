@@ -1,6 +1,6 @@
 return
 { { properties = { floating = true,
-      screen = "secondary",
+      screen = "primary",
       tag = 1 },
     rule = { class = "Skype" } },
   { properties = { tag = 1 },

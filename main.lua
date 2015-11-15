@@ -190,7 +190,7 @@ globalkeys = utility.keymap(
    "XF86AudioLowerVolume", function() statusbar[mouse.screen].widgets.vol:dec() end,
    "XF86AudioRaiseVolume", function() statusbar[mouse.screen].widgets.vol:inc() end,
    "XF86AudioMute", function() statusbar[mouse.screen].widgets.vol:mute() end,
-   rc.keys.lock, cmd("xscreensaver-command -activate"),
+   rc.keys.lock, cmd("xscreensaver-command -lock"),
    "M-l", minitray.toggle,
    "M-space", function()
       awful.layout.inc(layouts, 1)
