@@ -41,7 +41,7 @@ local runOnceApps = {
    'xrdb -merge ~/.Xresources',
    'mpdscribble',
    'kbdd',
-   '/usr/bin/avfsd -o allow_root -o intr -o sync_read ' .. userdir .. '/.avfs',
+   '/usr/bin/avfsd -o intr -o sync_read ' .. userdir .. '/.avfs',
    'megasync',
    'xscreensaver -no-splash',
    'pulseaudio --start',

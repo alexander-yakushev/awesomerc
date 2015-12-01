@@ -10,8 +10,8 @@ end
 theme.name = "Devotion 2.0"
 theme.theme_dir = util.getdir("config") .. "/themes/devotion"
 
-theme.wallpapers = { res("wallpapers/umbrella.jpg"),
-                     res("wallpapers/sunset-mood.jpg") }
+theme.wallpapers = { res("wallpapers/winter-frame-16x10.jpg"),
+                     res("wallpapers/winter-frame.jpg") }
 theme.icon_dir      = res("icons")
 
 theme.font          = "sans " .. vista.scale(9)
@@ -35,8 +35,8 @@ theme.bg_focus        = "#00000033"
 
 -- theme.motive          = "#82ee76" -- spring
 -- theme.motive          = "#e67b50" -- summer
-theme.motive          = "#dbaf5d" -- autumn
--- theme.motive          = "#76eec6" -- winter
+-- theme.motive          = "#dbaf5d" -- autumn
+theme.motive          = "#76eec6" -- winter
 
 theme.bg_normal_color = "#00000099"
 theme.bg_focus_color  = "#444444"
