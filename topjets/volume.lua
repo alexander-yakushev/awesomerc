@@ -46,7 +46,7 @@ function volume.notify(state, vol, icon)
    volume.notification_id =
       base.notify({ title = "Volume: " .. vol .. "%",
                     text = "State: " .. state,
-                    position = "bottom_right", timeout = 3,
+                    position = tooltip_position, timeout = 3,
                     icon = icon.large, replaces_id = volume.notification_id}).id
 end
 
