@@ -189,7 +189,7 @@ globalkeys = utility.keymap(
    "XF86MonBrightnessUp", cmd("xbacklight +" .. rc.xbacklight_step),
    "XF86AudioLowerVolume", function() statusbar[mouse.screen].widgets.vol:dec() end,
    "XF86AudioRaiseVolume", function() statusbar[mouse.screen].widgets.vol:inc() end,
-   "XF86AudioMute", function() statusbar[mouse.screen].widgets.vol:mute() end,
+   "XF86AudioMute", function() statusbar[mouse.screen].widgets.vol:toggle() end,
    rc.keys.lock, cmd("xscreensaver-command -lock"),
    "M-l", minitray.toggle,
    "M-space", function()

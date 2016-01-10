@@ -23,6 +23,8 @@ function volume.new()
    w.inc = volume.inc
    w.dec = volume.dec
    w.mute = volume.mute
+   w.unmute = volume.unmute
+   w.toggle = volume.toggle
    return w
 end
 
@@ -81,6 +83,14 @@ function volume.dec()
 end
 
 function volume.mute()
+   volume.update(io.popen("amixer set Master mute"), true)
+end
+
+function volume.unmute()
+   volume.update(io.popen("amixer set Master unmute"), true)
+end
+
+function volume.toggle()
    volume.update(io.popen("amixer set Master toggle"), true)
 end
 

@@ -117,7 +117,7 @@ function statusbar.initialize(bar, s, options)
    -- Volume widget
    widgets.vol = topjets.volume()
    widgets.vol:buttons(
-      keymap("LMB", function() widgets.vol:mute() end,
+      keymap("LMB", function() widgets.vol:toggle() end,
              "WHEELUP", function() widgets.vol:inc() end,
              "WHEELDOWN", function() widgets.vol:dec() end))
 
