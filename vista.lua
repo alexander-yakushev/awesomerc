@@ -266,6 +266,4 @@ function vista.scale(dimension, allow_float)
    end
 end
 
--- vista.xrandr.info(true)
-
 return setmetatable(vista, { __index = vista.properties })
