@@ -31,7 +31,7 @@ conv = utility.conversion
 
 -- Autorun programs
 local autorunApps = {
-   "setxkbmap -layout 'us,ua,ru' -variant ',winkeys,winkeys' -option grp:menu_toggle -option compose:ralt -option terminate:ctrl_alt_bksp",
+   "setxkbmap -layout 'us,ua,ru' -variant ',winkeys,winkeys' -option grp:menu_toggle -option compose:ralt",
    'sleep 2; xkbset m; xmodmap ~/.xmodmap'
 }
 
