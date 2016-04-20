@@ -259,6 +259,7 @@ end
 function vista.scale(dimension, allow_float)
    local info = vista.xrandr.info()
    local scaled = dimension * (info.actual_dpi / vista.baseline_dpi)
+   if scaled < 1 then scaled = 1 end
    if allow_float then
       return scaled
    else
