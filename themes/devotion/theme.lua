@@ -12,8 +12,10 @@ theme.theme_dir = util.getdir("config") .. "/themes/devotion"
 
 -- theme.wallpapers = { res("wallpapers/winter-frame-16x10.jpg"),
 --                      res("wallpapers/winter-frame.jpg") }
-theme.wallpapers = { res("wallpapers/dragonfly.jpg"),
-                     res("wallpapers/dragonfly.jpg") }
+-- theme.wallpapers = { res("wallpapers/dragonfly.jpg"),
+--                      res("wallpapers/dragonfly-16x9.jpg") }
+theme.wallpapers = { res("wallpapers/wasp-16x10.jpg"),
+                     res("wallpapers/wasp-16x9.jpg") }
 
 theme.icon_dir      = res("icons")
 
