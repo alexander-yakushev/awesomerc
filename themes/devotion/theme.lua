@@ -14,8 +14,10 @@ theme.theme_dir = util.getdir("config") .. "/themes/devotion"
 --                      res("wallpapers/winter-frame.jpg") }
 -- theme.wallpapers = { res("wallpapers/dragonfly.jpg"),
 --                      res("wallpapers/dragonfly-16x9.jpg") }
-theme.wallpapers = { res("wallpapers/wasp-16x10.jpg"),
-                     res("wallpapers/wasp-16x9.jpg") }
+-- theme.wallpapers = { res("wallpapers/wasp-16x10.jpg"),
+--                      res("wallpapers/wasp-16x9.jpg") }
+theme.wallpapers = { res("wallpapers/bee-16x10.jpg"),
+                     res("wallpapers/bee-16x9.jpg") }
 
 theme.icon_dir      = res("icons")
 
@@ -38,9 +40,9 @@ theme.border_marked   = "#91231c"
 theme.bg_normal       = "#00000099"
 theme.bg_focus        = "#00000033"
 
-theme.motive          = "#82ee76" -- spring
+-- theme.motive          = "#82ee76" -- spring
 -- theme.motive          = "#e67b50" -- summer
--- theme.motive          = "#dbaf5d" -- autumn
+theme.motive          = "#dbaf5d" -- autumn
 -- theme.motive          = "#76eec6" -- winter
 
 theme.bg_normal_color = "#00000099"
